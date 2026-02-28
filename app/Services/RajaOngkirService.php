@@ -9,12 +9,14 @@ class RajaOngkirService
     protected $apiKey;
     protected $baseUrl;
     protected $originCityId;
+    protected $originSubdistrictId;
 
     public function __construct()
     {
         $this->apiKey = config('services.rajaongkir.key');
         $this->baseUrl = rtrim(config('services.rajaongkir.base_url'), '/');
         $this->originCityId = config('services.rajaongkir.origin_city_id');
+        $this->originSubdistrictId = config('services.rajaongkir.origin_subdistrict_id');
     }
 
     public function getProvinces()
@@ -106,9 +108,12 @@ class RajaOngkirService
         // Komerce uses 'district' for Kecamatan, and 'sub-district' endpoint for Kelurahan.
         // Let's assume 'subdistrict' refers to Kelurahan here.
 
+        $originId = $this->originSubdistrictId ?: $this->originCityId;
+        $originType = $this->originSubdistrictId ? 'subdistrict' : 'city';
+
         $payload = [
-            'origin' => $this->originCityId,
-            'origin_type' => 'city',
+            'origin' => $originId,
+            'origin_type' => $originType,
             'destination' => $destinationId,
             'destination_type' => $destinationType,
             'weight' => $weight,

@@ -91,14 +91,14 @@ export default function OrderIndex({ orders }) {
                                             {order.items.map((item) => (
                                                 <div key={item.id} className="flex gap-4">
                                                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                        {item.product.gambar ? (
-                                                            <img src={`/storage/${item.product.gambar}`} alt={item.product.nama_produk} className="w-full h-full object-cover" />
+                                                        {item.product && item.product.gambar ? (
+                                                            <img src={`/storage/${item.product.gambar}`} alt={item.product_name_snapshot || "Product"} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400">No Img</div>
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center border">No Img</div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-gray-900">{item.product_name_snapshot || item.product.nama_produk}</h4>
+                                                        <h4 className="font-bold text-gray-900">{item.product_name_snapshot || (item.product && item.product.nama_produk)}</h4>
                                                         <p className="text-sm text-gray-500">{item.quantity} x Rp {(item.price_at_purchase || 0).toLocaleString('id-ID')}</p>
                                                     </div>
                                                 </div>

@@ -46,7 +46,7 @@ export default function OrderShow({ auth, order }) {
                             {order.items.map((item) => (
                                 <div key={item.id} className="p-6 flex gap-4">
                                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
-                                        {item.product?.gambar ? (
+                                        {item.product && item.product.gambar ? (
                                             <img src={`/storage/${item.product.gambar}`} alt={item.product_name_snapshot} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="flex items-center justify-center w-full h-full text-gray-400 text-xs">No Img</div>

@@ -53,14 +53,14 @@ export default function CartIndex({ cartItems }) {
                                             />
                                         </div>
                                         <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100">
-                                            {item.product.gambar ? (
+                                            {item.product && item.product.gambar ? (
                                                 <img
                                                     src={`/storage/${item.product.gambar}`}
-                                                    alt={item.product.nama_produk}
+                                                    alt={item.product.nama_produk || "Product"}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No img</div>
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs text-center border">No img</div>
                                             )}
                                         </div>
 

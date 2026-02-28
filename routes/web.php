@@ -32,10 +32,10 @@ Route::get('/search', function () {
     ]);
 })->name('search.index');
 
-Route::get('/products/{product}', function (\App\Models\Product $product) {
+Route::get('/products/{product}', function (Product $product) {
     return Inertia::render('Product/Detail', [
-        'product' => $product->load(['category', 'variants', 'reviews.user']),
-        'related_products' => \App\Models\Product::where('category_id', $product->category_id)
+        'product' => $product->load(['category', 'variants', 'images', 'reviews.user']),
+        'related_products' => Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->take(4)
             ->get()
@@ -49,12 +49,11 @@ Route::get('/api/search/recommended', function () {
 });
 
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('admin/products', \App\Http\Controllers\Admin\ProductController::class)->names('admin.products');
     Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
+    Route::get('admin/sales', [\App\Http\Controllers\Admin\SaleController::class, 'index'])->name('admin.sales.index');
 });
 
 Route::middleware('auth')->group(function () {

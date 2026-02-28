@@ -5,10 +5,9 @@ import { Minus, Plus, Heart, Share2, ShoppingCart, MessageSquare, Check, Truck }
 
 export default function Detail({ product, related_products }) {
     const [quantity, setQuantity] = useState(1);
-
-
     const [selectedVariant, setSelectedVariant] = useState(0);
     const [note, setNote] = useState('');
+    const [mainImage, setMainImage] = useState(product.gambar || null);
 
     // Use real variants from DB or fallback
     const variants = product.variants && product.variants.length > 0
@@ -71,9 +70,9 @@ export default function Detail({ product, related_products }) {
                     {/* Left Column: Images (4 cols) */}
                     <div className="lg:col-span-4 mb-8 lg:mb-0">
                         <div className="aspect-square bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm sticky top-24">
-                            {product.gambar ? (
+                            {mainImage ? (
                                 <img
-                                    src={`/storage/${product.gambar}`}
+                                    src={`/storage/${mainImage}`}
                                     alt={product.nama_produk}
                                     className="w-full h-full object-cover"
                                 />
@@ -83,14 +82,21 @@ export default function Detail({ product, related_products }) {
                                 </div>
                             )}
                         </div>
-                        {/* Thumbnail Grid (Mock) */}
-                        <div className="grid grid-cols-4 gap-4 mt-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="aspect-square bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-black transition-colors overflow-hidden">
-                                    {product.gambar && <img src={`/storage/${product.gambar}`} className="w-full h-full object-cover opacity-70 hover:opacity-100" />}
-                                </div>
-                            ))}
-                        </div>
+                        {/* Thumbnail Grid */}
+                        {product.images && product.images.length > 0 && (
+                            <div className="grid grid-cols-4 gap-4 mt-4">
+                                {/* First image always fallback to product.gambar if needed, but lets just map product.images */}
+                                {product.images.map((img) => (
+                                    <div
+                                        key={img.id}
+                                        onClick={() => setMainImage(img.image_path)}
+                                        className={`aspect-square bg-white rounded-xl border cursor-pointer hover:border-black transition-colors overflow-hidden ${mainImage === img.image_path ? 'border-black ring-2 ring-black/10' : 'border-gray-200'}`}
+                                    >
+                                        <img src={`/storage/${img.image_path}`} className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Middle Column: Product Info (5 cols) */}

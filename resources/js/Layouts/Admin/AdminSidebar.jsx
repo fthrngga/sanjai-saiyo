@@ -7,7 +7,7 @@ export default function AdminSidebar() {
 
     const links = [
         { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard },
-        { name: 'Penjualan', href: '#', icon: ShoppingBag }, // Placeholder
+        { name: 'Penjualan', href: route('admin.sales.index'), icon: ShoppingBag },
         { name: 'Produk', href: route('admin.products.index'), icon: Package },
         { name: 'Pesanan', href: route('admin.orders.index'), icon: FileText },
         { name: 'Ulasan', href: '#', icon: Star },

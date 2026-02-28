@@ -38,7 +38,8 @@ return [
     'rajaongkir' => [
         'key' => env('RAJAONGKIR_API_KEY', 'l5XpEoXY3f687ab4a8b7ab9bB87X8dxa'),
         'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1/'),
-        'origin_city_id' => env('RAJAONGKIR_ORIGIN_CITY_ID', '318'), // Default: Padang (City ID 318)
+        'origin_city_id' => env('RAJAONGKIR_ORIGIN_CITY_ID', '407'), // Default: Lima Puluh Kota
+        'origin_subdistrict_id' => env('RAJAONGKIR_ORIGIN_SUBDISTRICT_ID', '48946'), // Sarilamak
     ],
 
 ];
