@@ -7,12 +7,36 @@ export default function Detail({ product, related_products }) {
     const [quantity, setQuantity] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState(0);
     const [note, setNote] = useState('');
-    const [mainImage, setMainImage] = useState(product.gambar || null);
-
-    // Use real variants from DB or fallback
     const variants = product.variants && product.variants.length > 0
         ? product.variants
         : [{ id: 'default', name: 'Original', additional_price: 0, stock: product.stok }];
+
+    const initialImage = variants[0]?.image_path || product.gambar || null;
+    const [mainImage, setMainImage] = useState(initialImage);
+
+    // Collect all available images for the thumbnail grid
+    const allImages = [];
+    if (product.gambar) {
+        allImages.push({ id: 'main', path: product.gambar, variantIndex: 0 });
+    }
+    variants.forEach((v, idx) => {
+        if (v.image_path && !allImages.find(img => img.path === v.image_path)) {
+            allImages.push({ id: `var-${v.id || idx}`, path: v.image_path, variantIndex: idx });
+        } else if (v.image_path && allImages.find(img => img.path === v.image_path)) {
+            // If image already exists (like product.gambar), we ensure it points to this variant if needed
+            const existing = allImages.find(img => img.path === v.image_path);
+            if (existing.variantIndex === undefined) {
+                existing.variantIndex = idx;
+            }
+        }
+    });
+    if (product.images) {
+        product.images.forEach(img => {
+            if (!allImages.find(i => i.path === img.image_path)) {
+                allImages.push({ id: `gal-${img.id}`, path: img.image_path });
+            }
+        });
+    }
 
     const handleQuantityChange = (delta) => {
         const newQty = quantity + delta;
@@ -83,16 +107,20 @@ export default function Detail({ product, related_products }) {
                             )}
                         </div>
                         {/* Thumbnail Grid */}
-                        {product.images && product.images.length > 0 && (
+                        {allImages.length > 0 && (
                             <div className="grid grid-cols-4 gap-4 mt-4">
-                                {/* First image always fallback to product.gambar if needed, but lets just map product.images */}
-                                {product.images.map((img) => (
+                                {allImages.map((img) => (
                                     <div
                                         key={img.id}
-                                        onClick={() => setMainImage(img.image_path)}
-                                        className={`aspect-square bg-white rounded-xl border cursor-pointer hover:border-black transition-colors overflow-hidden ${mainImage === img.image_path ? 'border-black ring-2 ring-black/10' : 'border-gray-200'}`}
+                                        onClick={() => {
+                                            setMainImage(img.path);
+                                            if (img.variantIndex !== undefined) {
+                                                setSelectedVariant(img.variantIndex);
+                                            }
+                                        }}
+                                        className={`aspect-square bg-white rounded-xl border cursor-pointer hover:border-black transition-colors overflow-hidden ${mainImage === img.path ? 'border-black ring-2 ring-black/10' : 'border-gray-200'}`}
                                     >
-                                        <img src={`/storage/${img.image_path}`} className="w-full h-full object-cover" />
+                                        <img src={`/storage/${img.path}`} className="w-full h-full object-cover" />
                                     </div>
                                 ))}
                             </div>
@@ -126,7 +154,14 @@ export default function Detail({ product, related_products }) {
                                 {variants.map((v, idx) => (
                                     <button
                                         key={v.id}
-                                        onClick={() => setSelectedVariant(idx)}
+                                        onClick={() => {
+                                            setSelectedVariant(idx);
+                                            if (v.image_path) {
+                                                setMainImage(v.image_path);
+                                            } else {
+                                                setMainImage(product.gambar);
+                                            }
+                                        }}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${selectedVariant === idx
                                             ? 'bg-black text-white border-black'
                                             : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
@@ -154,7 +189,11 @@ export default function Detail({ product, related_products }) {
 
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-16 h-16 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100">
-                                    {product.gambar && <img src={`/storage/${product.gambar}`} className="w-full h-full object-cover" />}
+                                    <img
+                                        src={`/storage/${variants[selectedVariant]?.image_path || product.gambar}`}
+                                        className="w-full h-full object-cover"
+                                        style={{ display: (variants[selectedVariant]?.image_path || product.gambar) ? 'block' : 'none' }}
+                                    />
                                 </div>
                                 <div className="text-xs text-gray-500">
                                     <p className="font-medium text-gray-900 truncate max-w-[150px]">{variants[selectedVariant]?.name || 'Original'}</p>

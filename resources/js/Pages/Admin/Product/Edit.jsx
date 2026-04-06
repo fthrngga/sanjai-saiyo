@@ -17,7 +17,9 @@ export default function Edit({ product, categories }) {
         deskripsi: product.deskripsi || '',
         gambar: [], // For new files
         existing_images: product.images || [], // For existing images
-        variants: product.variants || [],
+        variants: product.variants && product.variants.length > 0
+            ? product.variants
+            : [{ name: 'Original', additional_price: 0, stock: product.stok }],
     });
 
     const [previews, setPreviews] = useState([]); // For newly added images previews
@@ -113,14 +115,11 @@ export default function Edit({ product, categories }) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="stok">Stok Total</Label>
-                                    <Input
-                                        id="stok"
-                                        type="number"
-                                        value={data.stok}
-                                        onChange={e => setData('stok', e.target.value)}
-                                    />
-                                    <InputError message={errors.stok} />
+                                    <Label>Stok Total (Otomatis)</Label>
+                                    <div className="flex h-10 w-full items-center rounded-md border border-slate-200 bg-gray-50 px-3 py-2 text-sm text-gray-500 font-bold">
+                                        {data.variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0)} Pcs
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">Stok diakumulasi dari total keseluruhan varian produk.</p>
                                 </div>
                             </div>
 
@@ -151,48 +150,77 @@ export default function Edit({ product, categories }) {
                     {/* Varian */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold">Varian Produk (Opsional)</h2>
+                            <div>
+                                <h2 className="text-xl font-bold">Varian & Stok Produk (Wajib)</h2>
+                                <p className="text-sm text-gray-500 mt-1">Stok produk dikontrol dari varian-varian yang Anda definisikan di sini.</p>
+                            </div>
                             <Button type="button" variant="outline" onClick={addVariant} size="sm">
                                 <Plus className="w-4 h-4 mr-2" /> Tambah Varian
                             </Button>
                         </div>
 
                         {data.variants && data.variants.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-4 border-2 border-dashed border-gray-100 rounded-lg">Tidak ada varian. Tekan tombol di atas untuk menambah.</p>
+                            <p className="text-sm text-gray-500 text-center py-4 border-2 border-dashed border-gray-100 rounded-lg">Minimal harus ada 1 varian (Original).</p>
                         ) : (
                             <div className="space-y-4">
                                 {data.variants.map((variant, index) => (
-                                    <div key={index} className="flex items-end gap-4 p-4 border border-gray-100 rounded-lg bg-gray-50/50">
-                                        <div className="flex-1 space-y-2">
+                                    <div key={index} className="flex flex-col md:flex-row items-start md:items-end gap-4 p-4 border border-gray-100 rounded-lg bg-gray-50/50">
+                                        {variant.image_path && typeof variant.image === 'undefined' && (
+                                            <div className="w-12 h-12 rounded overflow-hidden border shrink-0 bg-white">
+                                                <img src={`/storage/${variant.image_path}`} alt="variant" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 w-full space-y-2">
                                             <Label>Nama Varian</Label>
                                             <Input
                                                 value={variant.name}
                                                 onChange={e => updateVariant(index, 'name', e.target.value)}
+                                                placeholder="Contoh: Original"
                                             />
+                                            {errors[`variants.${index}.name`] && <InputError message={errors[`variants.${index}.name`]} />}
                                         </div>
-                                        <div className="w-1/4 space-y-2">
-                                            <Label>Harga Tambahan</Label>
+                                        <div className="flex-1 w-full space-y-2">
+                                            <Label>Foto (Opsional)</Label>
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={e => updateVariant(index, 'image', e.target.files[0])}
+                                                className="text-xs file:h-full file:bg-gray-100 file:border-0"
+                                            />
+                                            {errors[`variants.${index}.image`] && <InputError message={errors[`variants.${index}.image`]} />}
+                                        </div>
+                                        <div className="w-full md:w-32 space-y-2">
+                                            <Label>Harga +</Label>
                                             <Input
                                                 type="number"
                                                 value={variant.additional_price}
                                                 onChange={e => updateVariant(index, 'additional_price', e.target.value)}
+                                                placeholder="0"
                                             />
                                         </div>
-                                        <div className="w-1/4 space-y-2">
+                                        <div className="w-full md:w-24 space-y-2">
                                             <Label>Stok Varian</Label>
                                             <Input
                                                 type="number"
                                                 value={variant.stock}
                                                 onChange={e => updateVariant(index, 'stock', e.target.value)}
+                                                placeholder="0"
                                             />
                                         </div>
-                                        <Button type="button" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => removeVariant(index)}>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                                            onClick={() => removeVariant(index)}
+                                            disabled={data.variants.length <= 1}
+                                        >
                                             <Trash2 className="w-5 h-5" />
                                         </Button>
                                     </div>
                                 ))}
                             </div>
                         )}
+                        {errors.variants && <InputError message={errors.variants} className="mt-2" />}
                     </div>
 
                     {/* Foto Produk */}
