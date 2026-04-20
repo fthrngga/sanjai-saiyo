@@ -25,10 +25,12 @@ class CheckoutController extends Controller
         }
 
         $provinces = $this->rajaOngkir->getProvinces();
+        $userAddresses = auth()->user()->addresses;
 
         return \Inertia\Inertia::render('Checkout/Index', [
             'cartItems' => $cartItems,
-            'provinces' => $provinces
+            'provinces' => $provinces,
+            'userAddresses' => $userAddresses
         ]);
     }
 

@@ -1,9 +1,11 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
 import { Package, Truck, Clock, CheckCircle } from 'lucide-react';
 
 export default function OrderIndex({ orders }) {
+    const [reviewData, setReviewData] = React.useState(null);
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -88,21 +90,40 @@ export default function OrderIndex({ orders }) {
                                 <div className="p-6">
                                     <div className="flex flex-col md:flex-row gap-6">
                                         <div className="flex-1 space-y-4">
-                                            {order.items.map((item) => (
-                                                <div key={item.id} className="flex gap-4">
-                                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                        {item.product && item.product.gambar ? (
-                                                            <img src={`/storage/${item.product.gambar}`} alt={item.product_name_snapshot || "Product"} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center border">No Img</div>
+                                            {order.items.map((item) => {
+                                                const hasReviewed = order.reviews && order.reviews.some(r => r.product_id === item.product_id);
+                                                return (
+                                                    <div key={item.id} className="flex gap-4">
+                                                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            {item.product && item.product.gambar ? (
+                                                                <img src={`/storage/${item.product.gambar}`} alt={item.product_name_snapshot || "Product"} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center border">No Img</div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-gray-900">{item.product_name_snapshot || (item.product && item.product.nama_produk)}</h4>
+                                                            <p className="text-sm text-gray-500">{item.quantity} x Rp {(item.price_at_purchase || 0).toLocaleString('id-ID')}</p>
+                                                        </div>
+                                                        {order.order_status === 'completed' && item.product && (
+                                                            <div className="flex items-center">
+                                                                {hasReviewed ? (
+                                                                    <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-medium flex items-center gap-1">
+                                                                        <CheckCircle className="w-3 h-3" /> Diulas
+                                                                    </span>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => setReviewData({ order_id: order.id, product_id: item.product_id, product_name: item.product_name_snapshot || item.product.nama_produk })}
+                                                                        className="text-yellow-600 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                                                                    >
+                                                                        Beri Ulasan
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-900">{item.product_name_snapshot || (item.product && item.product.nama_produk)}</h4>
-                                                        <p className="text-sm text-gray-500">{item.quantity} x Rp {(item.price_at_purchase || 0).toLocaleString('id-ID')}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
 
                                         <div className="md:w-1/3 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 text-sm">
@@ -124,9 +145,100 @@ export default function OrderIndex({ orders }) {
                             </div>
                         ))}
                     </div>
-                )
-                }
-            </main >
-        </div >
+                )}
+            </main>
+
+            <ReviewModal 
+                isOpen={!!reviewData} 
+                onClose={() => setReviewData(null)} 
+                data={reviewData} 
+            />
+        </div>
+    );
+}
+
+function ReviewModal({ isOpen, onClose, data }) {
+    const form = useForm({
+        rating: 5,
+        comment: '',
+        order_id: '',
+        product_id: '',
+    });
+
+    React.useEffect(() => {
+        if (data) {
+            form.setData({
+                rating: 5,
+                comment: '',
+                order_id: data.order_id,
+                product_id: data.product_id,
+            });
+        }
+    }, [data]);
+
+    if (!isOpen) return null;
+
+    const submit = (e) => {
+        e.preventDefault();
+        form.post(route('reviews.store'), {
+            onSuccess: () => {
+                form.reset();
+                onClose();
+            }
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl animate-in fade-in zoom-in duration-200">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Nilai Produk</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <p className="text-sm text-gray-500 mb-6">Bagaimana kualitas dari <strong className="text-black">{data?.product_name}</strong>?</p>
+
+                <form onSubmit={submit}>
+                    <div className="mb-6 flex justify-center gap-2">
+                        {[1, 2, 3, 4, 5].map(star => (
+                            <button
+                                type="button"
+                                key={star}
+                                onClick={() => form.setData('rating', star)}
+                                className="group p-1"
+                            >
+                                <svg 
+                                    className={`w-10 h-10 transition-colors ${form.data.rating >= star ? 'text-yellow-400 fill-current' : 'text-gray-300 fill-current group-hover:text-yellow-200'}`} 
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                >
+                                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/>
+                                </svg>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold mb-2">Tuliskan pengalaman Anda</label>
+                        <textarea
+                            value={form.data.comment}
+                            onChange={e => form.setData('comment', e.target.value)}
+                            className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-black focus:border-black transition-colors px-4 py-3 resize-none"
+                            rows="4"
+                            placeholder="Rasa keripiknya enak, renyah, dan pengiriman super cepat..."
+                        ></textarea>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={form.processing}
+                        className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                    >
+                        {form.processing ? 'Menyimpan...' : 'Kirim Ulasan'}
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 }

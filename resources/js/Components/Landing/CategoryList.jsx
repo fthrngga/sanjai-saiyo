@@ -8,14 +8,18 @@ export default function CategoryList({ categories }) {
                 <div className="flex animate-marquee whitespace-nowrap gap-12 sm:gap-24 items-center">
                     {/* Double the list for infinite scroll effect */}
                     {[...categories, ...categories, ...categories].map((cat, idx) => (
-                        <div key={`${cat.id}-${idx}`} className="flex items-center gap-2 group cursor-pointer">
-                            <span className="w-2 h-2 rounded-full bg-yellow-400 group-hover:scale-150 transition-transform duration-300"></span>
+                        <Link 
+                            key={`${cat.id}-${idx}`} 
+                            href={`/search?query=${encodeURIComponent(cat.nama_kategori)}`}
+                            className="flex items-center gap-2 group cursor-pointer"
+                        >
+                            <span className="w-2 h-2 rounded-full bg-yellow-400 group-hover:scale-150 transition-transform duration-300 shrink-0"></span>
                             <span
-                                className="text-3xl md:text-5xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400 hover:from-black hover:to-gray-800 transition-all duration-500 font-serif tracking-tighter"
+                                className="text-3xl md:text-5xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400 group-hover:from-black group-hover:to-gray-800 transition-all duration-500 font-serif tracking-tighter"
                             >
                                 {cat.nama_kategori}
                             </span>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

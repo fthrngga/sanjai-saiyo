@@ -6,17 +6,91 @@ import Dropdown from '@/Components/Dropdown';
 import SearchInput from '@/Components/Landing/SearchInput';
 
 export default function FloatingNavbar() {
-    const { auth, cart_count } = usePage().props;
+    const { url, props } = usePage();
+    const { auth, cart_count } = props;
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [currentHash, setCurrentHash] = useState('');
 
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 50);
+            
+            // Scroll spy logic for catalog
+            if (typeof window !== 'undefined' && window.location.pathname === '/') {
+                const catalogEl = document.getElementById('catalog');
+                if (catalogEl) {
+                    const rect = catalogEl.getBoundingClientRect();
+                    // Treat it as "in view" if top is near viewport upper third
+                    if (rect.top <= 250) {
+                        setCurrentHash((prev) => prev !== '#catalog' ? '#catalog' : prev);
+                    } else {
+                        setCurrentHash((prev) => prev !== '' ? '' : prev);
+                    }
+                }
+            }
         };
         window.addEventListener('scroll', handleScroll);
+        
+        if (typeof window !== 'undefined') {
+            setCurrentHash(window.location.hash);
+            const handleHashChange = () => setCurrentHash(window.location.hash);
+            window.addEventListener('hashchange', handleHashChange);
+            
+            return () => {
+                window.removeEventListener('scroll', handleScroll);
+                window.removeEventListener('hashchange', handleHashChange);
+            }
+        }
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    const navLinkClass = (path) => {
+        let active = false;
+        if (typeof window !== 'undefined') {
+            const currentPath = window.location.pathname;
+            const linkPath = path.split('#')[0] || '/';
+            const linkHash = path.includes('#') ? '#' + path.split('#')[1] : '';
+
+            if (linkHash) {
+                // Example: path is "/#catalog" -> linkPath: "/", linkHash: "#catalog"
+                active = currentPath === linkPath && currentHash === linkHash;
+            } else if (linkPath === '/') {
+                // Example: path is "/"
+                active = currentPath === '/' && !currentHash;
+            } else {
+                // Example: path is "/about"
+                active = currentPath === linkPath || currentPath.startsWith(linkPath + '/');
+            }
+        }
+        
+        return `transition-all whitespace-nowrap font-medium ${
+            active 
+                ? (scrolled ? 'text-yellow-400 font-bold' : 'text-yellow-600 font-bold')
+                : 'hover:opacity-70'
+        }`;
+    };
+
+    const mobileNavLinkClass = (path) => {
+        let active = false;
+        if (typeof window !== 'undefined') {
+            const currentPath = window.location.pathname;
+            const linkPath = path.split('#')[0] || '/';
+            const linkHash = path.includes('#') ? '#' + path.split('#')[1] : '';
+
+            if (linkHash) {
+                active = currentPath === linkPath && currentHash === linkHash;
+            } else if (linkPath === '/') {
+                active = currentPath === '/' && !currentHash;
+            } else {
+                active = currentPath === linkPath || currentPath.startsWith(linkPath + '/');
+            }
+        }
+
+        return `transition-all ${
+            active ? 'text-yellow-400 font-black text-2xl' : 'text-white hover:text-yellow-200 text-2xl font-bold'
+        }`;
+    };
 
     return (
         <>
@@ -28,21 +102,21 @@ export default function FloatingNavbar() {
                 `}>
                     {/* Logo */}
                     <Link href="/" className="font-black text-xl tracking-tighter shrink-0 mr-4">
-                        SANJAI<span className={scrolled ? 'text-yellow-400' : 'text-yellow-600'}>.</span>
+                        SAIYO<span className={scrolled ? 'text-yellow-400' : 'text-yellow-600'}>.</span>
                     </Link>
 
                     {/* Desktop Menu */}
-                    <div className="hidden md:flex items-center gap-8 font-medium text-sm">
-                        <Link href="/" className="hover:opacity-70 transition-opacity">Beranda</Link>
-                        <Link href="#catalog" className="hover:opacity-70 transition-opacity">Katalog</Link>
-                        <Link href="/about" className="hover:opacity-70 transition-opacity">Tentang</Link>
-                        <Link href="/contact" className="hover:opacity-70 transition-opacity">Kontak</Link>
+                    <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm mx-2">
+                        <Link href="/" className={navLinkClass('/')}>Beranda</Link>
+                        <Link href="/#catalog" className={navLinkClass('/#catalog')}>Katalog</Link>
+                        <Link href="/about" className={navLinkClass('/about')}>Tentang</Link>
+                        <Link href="/contact" className={navLinkClass('/contact')}>Kontak</Link>
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 lg:gap-4 ml-4">
                         {/* Search Input (Desktop) */}
-                        <div className="hidden md:block w-48 xl:w-64">
+                        <div className="hidden lg:block w-48 xl:w-64 shrink-0">
                             <SearchInput />
                         </div>
 
@@ -55,7 +129,7 @@ export default function FloatingNavbar() {
                         </button>
 
                         {/* Cart */}
-                        <Link href={route('cart.index')} className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors group">
+                        <Link href={route('cart.index')} className={`relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors group ${url.startsWith('/cart') ? (scrolled ? 'text-yellow-400' : 'text-yellow-600') : ''}`}>
                             <ShoppingCart className="w-5 h-5" />
                             {cart_count > 0 && (
                                 <span className="absolute top-1 right-0 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
@@ -70,7 +144,7 @@ export default function FloatingNavbar() {
                                 <div className="relative flex items-center h-full">
                                     <Dropdown>
                                         <Dropdown.Trigger>
-                                            <button className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all hover:opacity-70 ${scrolled ? 'text-white' : 'text-black'}`}>
+                                            <button className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all hover:opacity-70 ${url.startsWith('/profile') || url.startsWith('/orders') ? (scrolled ? 'text-yellow-400' : 'text-yellow-600') : (scrolled ? 'text-white' : 'text-black')}`}>
                                                 <User className="w-5 h-5" />
                                                 <span className="hidden lg:inline">{auth.user.name}</span>
                                             </button>
@@ -119,11 +193,11 @@ export default function FloatingNavbar() {
                         <SearchInput className="w-full text-black" />
                     </div>
 
-                    <div className="flex flex-col items-center gap-8 text-white text-2xl font-bold w-full overflow-y-auto pb-20">
-                        <Link href="/" onClick={() => setMobileMenuOpen(false)}>Beranda</Link>
-                        <Link href="#catalog" onClick={() => setMobileMenuOpen(false)}>Katalog</Link>
-                        <Link href="/about" onClick={() => setMobileMenuOpen(false)}>Tentang</Link>
-                        <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>Kontak</Link>
+                    <div className="flex flex-col items-center gap-8 w-full overflow-y-auto pb-20">
+                        <Link href="/" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/')}>Beranda</Link>
+                        <Link href="/#catalog" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/#catalog')}>Katalog</Link>
+                        <Link href="/about" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/about')}>Tentang</Link>
+                        <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/contact')}>Kontak</Link>
 
                         <div className="w-12 h-1 bg-white/10 rounded-full" />
 
@@ -135,7 +209,7 @@ export default function FloatingNavbar() {
                                 <Link href={route('logout')} method="post" as="button" onClick={() => setMobileMenuOpen(false)} className="text-red-400 text-xl mt-4">Log Out</Link>
                             </>
                         ) : (
-                            <Link href={route('login')} onClick={() => setMobileMenuOpen(false)} className="text-yellow-400">Masuk / Daftar</Link>
+                            <Link href={route('login')} onClick={() => setMobileMenuOpen(false)} className="text-yellow-400 text-xl font-bold">Masuk / Daftar</Link>
                         )}
                     </div>
 

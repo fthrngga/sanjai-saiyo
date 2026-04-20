@@ -10,8 +10,7 @@ export default function AdminSidebar() {
         { name: 'Penjualan', href: route('admin.sales.index'), icon: ShoppingBag },
         { name: 'Produk', href: route('admin.products.index'), icon: Package },
         { name: 'Pesanan', href: route('admin.orders.index'), icon: FileText },
-        { name: 'Ulasan', href: '#', icon: Star },
-        { name: 'Konfirmasi', href: '#', icon: CheckSquare },
+        { name: 'Ulasan', href: route('admin.reviews.index'), icon: Star },
     ];
 
     return (

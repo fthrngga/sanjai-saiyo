@@ -30,8 +30,20 @@ class CartController extends Controller
             ->where('product_variant_id', $request->product_variant_id)
             ->first();
 
+        // If it's a Buy Now action, deselect all existing cart items first
+        if ($request->is_buy_now) {
+            \App\Models\Cart::where('user_id', auth()->id())->update(['is_selected' => false]);
+        }
+
         if ($cartItem) {
-            $cartItem->quantity += $request->quantity;
+            // For Buy Now, ignore adding to existing quantity, just set the quantity to what they chose this time
+            // Or add to it depending on logic. Usually Buy Now sets exact quantity.
+            if ($request->is_buy_now) {
+                $cartItem->quantity = $request->quantity;
+                $cartItem->is_selected = true;
+            } else {
+                $cartItem->quantity += $request->quantity;
+            }
             $cartItem->save();
         } else {
             \App\Models\Cart::create([
@@ -39,7 +51,12 @@ class CartController extends Controller
                 'product_id' => $request->product_id,
                 'product_variant_id' => $request->product_variant_id,
                 'quantity' => $request->quantity,
+                'is_selected' => $request->is_buy_now ? true : false, // Default is usually true or false in migration, force it here
             ]);
+        }
+
+        if ($request->is_buy_now) {
+            return redirect()->route('checkout.index');
         }
 
         return redirect()->back()->with('success', 'Produk ditambahkan ke keranjang.');

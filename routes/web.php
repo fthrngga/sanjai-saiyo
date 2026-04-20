@@ -21,9 +21,22 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
+
+Route::get('/contact', function () {
+    return Inertia::render('Contact');
+})->name('contact');
+
 Route::get('/search', function () {
     $query = request('query');
-    $products = \App\Models\Product::where('nama_produk', 'like', "%{$query}%")
+    
+    $products = \App\Models\Product::with('category')
+        ->where('nama_produk', 'like', "%{$query}%")
+        ->orWhereHas('category', function ($q) use ($query) {
+            $q->where('nama_kategori', 'like', "%{$query}%");
+        })
         ->get();
 
     return Inertia::render('Search', [
@@ -54,6 +67,8 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::resource('admin/products', \App\Http\Controllers\Admin\ProductController::class)->names('admin.products');
     Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
     Route::get('admin/sales', [\App\Http\Controllers\Admin\SaleController::class, 'index'])->name('admin.sales.index');
+    Route::get('admin/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('admin.reviews.index');
+    Route::delete('admin/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 });
 
 Route::middleware('auth')->group(function () {
@@ -75,9 +90,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{order}/complete', [\App\Http\Controllers\OrderController::class, 'complete'])->name('orders.complete');
 
+    Route::post('/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // User Addresses Routes
+    Route::post('/user/addresses', [\App\Http\Controllers\UserAddressController::class, 'store'])->name('user.addresses.store');
+    Route::put('/user/addresses/{id}', [\App\Http\Controllers\UserAddressController::class, 'update'])->name('user.addresses.update');
+    Route::delete('/user/addresses/{id}', [\App\Http\Controllers\UserAddressController::class, 'destroy'])->name('user.addresses.destroy');
+    Route::put('/user/addresses/{id}/primary', [\App\Http\Controllers\UserAddressController::class, 'setPrimary'])->name('user.addresses.setPrimary');
 });
 
 require __DIR__ . '/auth.php';

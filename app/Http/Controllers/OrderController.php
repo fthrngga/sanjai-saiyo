@@ -10,7 +10,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with('items.product')
+        $orders = Order::with(['items.product', 'reviews'])
             ->where('user_id', auth()->id())
             ->latest()
             ->get();

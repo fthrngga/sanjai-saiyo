@@ -14,6 +14,11 @@ export default function Detail({ product, related_products }) {
     const initialImage = variants[0]?.image_path || product.gambar || null;
     const [mainImage, setMainImage] = useState(initialImage);
 
+    const reviews = product.reviews || [];
+    const avgRating = reviews.length > 0 
+        ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+        : '0.0';
+
     // Collect all available images for the thumbnail grid
     const allImages = [];
     if (product.gambar) {
@@ -70,6 +75,22 @@ export default function Detail({ product, related_products }) {
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 3000);
             }
+        });
+    };
+
+    const handleBuyNow = () => {
+        if (!auth.user) {
+            setShowLoginModal(true);
+            return;
+        }
+
+        const variant = variants[selectedVariant];
+
+        router.post(route('cart.store'), {
+            product_id: product.id,
+            product_variant_id: variant.id === 'default' ? null : variant.id,
+            quantity: quantity,
+            is_buy_now: true
         });
     };
 
@@ -135,7 +156,7 @@ export default function Detail({ product, related_products }) {
                             </h1>
                             <div className="flex items-center gap-4 text-sm text-gray-500">
                                 <div className="flex items-center text-yellow-500">
-                                    ★ {product.rating_average || '0.0'} <span className="text-gray-400 ml-1">({product.reviews?.length || 0} Ulasan)</span>
+                                    ★ {avgRating} <span className="text-gray-400 ml-1">({reviews.length} Ulasan)</span>
                                 </div>
                                 <span>•</span>
                                 <span>Terjual {product.total_sold || 0}</span>
@@ -243,7 +264,10 @@ export default function Detail({ product, related_products }) {
                                     <Plus className="w-5 h-5" />
                                     Keranjang
                                 </button>
-                                <button className="w-full py-3 px-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 flex items-center justify-center gap-2 transition-colors shadow-lg">
+                                <button 
+                                    onClick={handleBuyNow}
+                                    className="w-full py-3 px-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 flex items-center justify-center gap-2 transition-colors shadow-lg"
+                                >
                                     Beli Langsung
                                 </button>
                             </div>
@@ -257,6 +281,50 @@ export default function Detail({ product, related_products }) {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="mt-20 border-t border-gray-100 pt-10">
+                    <div className="lg:w-2/3">
+                        <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
+                            <MessageSquare className="w-6 h-6" /> Ulasan Pelanggan
+                            <span className="text-lg font-normal text-gray-500 ml-2">({reviews.length})</span>
+                        </h2>
+
+                        {reviews.length === 0 ? (
+                            <div className="text-center py-10 bg-white rounded-2xl border border-gray-100 mb-8">
+                                <p className="text-gray-500">Belum ada ulasan untuk produk ini. Menjadi yang pertama memberikan ulasan!</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {reviews.map((review) => (
+                                    <div key={review.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500">
+                                                    {review.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900 leading-none mb-1">{review.user?.name || 'Pengguna'}</h4>
+                                                    <div className="flex text-yellow-400 text-sm">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <svg key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className="text-sm text-gray-400">
+                                                {new Date(review.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                            </span>
+                                        </div>
+                                        {review.comment && (
+                                            <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
