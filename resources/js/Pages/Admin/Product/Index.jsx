@@ -8,11 +8,34 @@ import {
     TableHeader,
     TableRow,
 } from "@/Components/ui/table";
-import { Link, usePage } from '@inertiajs/react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Link, usePage, router } from '@inertiajs/react';
+import { Plus, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import Modal from '@/Components/Modal';
+import { useState } from 'react';
 
 export default function Index({ products }) {
     const { links } = products;
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const confirmDelete = (product) => {
+        setProductToDelete(product);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDelete = () => {
+        if (!productToDelete) return;
+        setIsDeleting(true);
+        router.delete(route('admin.products.destroy', productToDelete.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsDeleteModalOpen(false);
+                setProductToDelete(null);
+            },
+            onFinish: () => setIsDeleting(false),
+        });
+    };
 
     return (
         <AdminLayout title="Produk">
@@ -50,8 +73,10 @@ export default function Index({ products }) {
                                         <TableCell>{index + 1 + (products.current_page - 1) * products.per_page}</TableCell>
                                         <TableCell>
                                             <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden">
-                                                {product.gambar ? (
+                                                {(product.gambar && product.gambar !== 'null') ? (
                                                     <img src={`/storage/${product.gambar}`} alt={product.nama_produk} className="w-full h-full object-cover" />
+                                                ) : (product.variants && product.variants.length > 0 && product.variants[0].image_path) ? (
+                                                    <img src={`/storage/${product.variants[0].image_path}`} alt={product.nama_produk} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No IMG</div>
                                                 )}
@@ -69,15 +94,13 @@ export default function Index({ products }) {
                                                     </Link>
                                                 </Button>
 
-                                                <Link
-                                                    href={route('admin.products.destroy', product.id)}
-                                                    method="delete"
-                                                    as="button"
-                                                    preserveScroll
+                                                <button
+                                                    onClick={() => confirmDelete(product)}
                                                     className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-100 hover:text-slate-900 h-10 w-10"
+                                                    title="Hapus Produk"
                                                 >
                                                     <Trash2 className="h-4 w-4 text-red-500" />
-                                                </Link>
+                                                </button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -113,6 +136,50 @@ export default function Index({ products }) {
                     </div>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} maxWidth="md">
+                <div className="p-6">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                            <AlertTriangle className="w-6 h-6 text-red-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Konfirmasi Penghapusan</h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                            Apakah Anda yakin ingin menghapus produk <span className="font-semibold text-gray-800">"{productToDelete?.nama_produk}"</span>? Aksi ini tidak dapat dibatalkan.
+                        </p>
+                    </div>
+
+                    <div className="flex justify-end gap-3 mt-6">
+                        <button
+                            type="button"
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            disabled={isDeleting}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Menghapus...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-4 h-4" />
+                                    Ya, Hapus
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </AdminLayout>
     );
 }

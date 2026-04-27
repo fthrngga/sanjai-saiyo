@@ -26,4 +26,16 @@ class ReviewController extends Controller
 
         return back()->with('success', 'Ulasan berhasil dihapus.');
     }
+
+    public function bulkDestroy(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:reviews,id',
+        ]);
+
+        Review::whereIn('id', $request->ids)->delete();
+
+        return back()->with('success', count($request->ids) . ' Ulasan berhasil dihapus.');
+    }
 }

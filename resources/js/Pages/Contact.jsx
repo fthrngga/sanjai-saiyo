@@ -51,10 +51,10 @@ export default function Contact() {
                                             <MapPin className="w-5 h-5 text-black" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-lg mb-1">Toko Pusat</h4>
+                                            <h4 className="font-bold text-lg mb-1">Lokasi Toko</h4>
                                             <p className="text-gray-600 leading-relaxed">
-                                                Jl. Raya Sumbar No.km13, Ketinggian,<br />
-                                                Sarilamak, Kec. Harau,<br />
+                                                Sanjai Saiyo<br />
+                                                Ketinggian, Sarilamak, Kec. Harau,<br />
                                                 Kabupaten Lima Puluh Kota, Sumatera Barat 26271
                                             </p>
                                         </div>
@@ -86,25 +86,44 @@ export default function Contact() {
                                     <a href="#" className="w-12 h-12 border border-gray-200 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-colors">
                                         <Instagram className="w-5 h-5" />
                                     </a>
-                                    {/* Add other socials if needed */}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Form Column */}
-                        <div className="bg-white p-8 lg:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative">
-                            {sent ? (
-                                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-[2rem] z-10 flex flex-col items-center justify-center animate-in fade-in duration-500">
-                                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-                                        <Check className="w-10 h-10" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Pesan Terkirim!</h3>
-                                    <p className="text-gray-600 text-center max-w-xs">Terima kasih telah menghubungi kami. Tim kami akan segera membalas pesan Anda.</p>
-                                </div>
-                            ) : null}
+                        {/* Map Column */}
+                        <div className="h-[400px] lg:h-auto rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 bg-gray-50">
+                            <iframe 
+                                src="https://maps.google.com/maps?q=-0.14651638824842017,100.6814796348945+(Sanjai%20Saiyo)&t=&z=16&ie=UTF8&iwloc=B&output=embed" 
+                                width="100%" 
+                                height="100%" 
+                                style={{border:0, minHeight: '400px'}} 
+                                allowFullScreen="" 
+                                loading="lazy" 
+                                referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
+                        </div>
 
-                            <h3 className="text-2xl font-bold mb-8">Kirimkan Pesan</h3>
-                            <form onSubmit={submit} className="space-y-6">
+                    </div>
+
+                    {/* Form Section */}
+                    <div className="mt-24 w-full bg-white p-8 lg:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative">
+                        {sent ? (
+                            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-[2rem] z-10 flex flex-col items-center justify-center animate-in fade-in duration-500">
+                                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
+                                    <Check className="w-10 h-10" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Pesan Terkirim!</h3>
+                                <p className="text-gray-600 text-center max-w-xs">Terima kasih telah menghubungi kami. Tim kami akan segera membalas pesan Anda.</p>
+                            </div>
+                        ) : null}
+
+                        <div className="text-center mb-10">
+                            <h3 className="text-2xl font-bold mb-3">Kirimkan Pesan</h3>
+                            <p className="text-gray-600">Silakan isi formulir di bawah ini untuk menghubungi kami secara langsung.</p>
+                        </div>
+                        
+                        <form onSubmit={submit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-900 mb-2">Nama Lengkap</label>
                                     <input
@@ -129,28 +148,27 @@ export default function Contact() {
                                     />
                                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-900 mb-2">Pesan</label>
-                                    <textarea
-                                        rows="5"
-                                        value={data.message}
-                                        onChange={e => setData('message', e.target.value)}
-                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-black focus:border-black transition-colors px-4 py-3 resize-none"
-                                        placeholder="Apa yang ingin Anda sampaikan?"
-                                        required
-                                    ></textarea>
-                                    {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group"
-                                >
-                                    Kirim Pesan Sekarang
-                                    <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                </button>
-                            </form>
-                        </div>
-
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">Pesan</label>
+                                <textarea
+                                    rows="5"
+                                    value={data.message}
+                                    onChange={e => setData('message', e.target.value)}
+                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-black focus:border-black transition-colors px-4 py-3 resize-none"
+                                    placeholder="Apa yang ingin Anda sampaikan?"
+                                    required
+                                ></textarea>
+                                {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group"
+                            >
+                                Kirim Pesan Sekarang
+                                <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                            </button>
+                        </form>
                     </div>
                 </div>
             </section>

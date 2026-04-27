@@ -8,25 +8,47 @@ export default function OrderShow({ auth, order }) {
     const { data: statusData, setData: setStatusData, patch, processing, errors } = useForm({
         order_status: order.order_status,
         tracking_number: order.tracking_number || '',
+        cancel_reason: order.cancel_reason || '',
     });
 
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
     const handleStatusUpdate = (e) => {
-        e.preventDefault();
-        patch(route('admin.orders.update', order.id));
+        if (e) e.preventDefault();
+        
+        if (statusData.order_status === 'cancelled' && !isCancelModalOpen) {
+            setIsCancelModalOpen(true);
+            return;
+        }
+
+        patch(route('admin.orders.update', order.id), {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => setIsCancelModalOpen(false)
+        });
     };
 
     return (
         <AdminLayout title={`Detail Pesanan #${order.id}`}>
             <div className="mb-6 flex items-center justify-between">
-                <Button variant="ghost" className="gap-2 pl-0 hover:pl-2 transition-all" asChild>
+                <Button variant="outline" className="gap-2 bg-white border-2 border-gray-400 font-semibold hover:border-gray-600 hover:bg-gray-50 shadow-sm transition-all" asChild>
                     <Link href={route('admin.orders.index')}>
-                        <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar
+                        <ArrowLeft className="w-5 h-5 flex-shrink-0" /> <span className="pt-0.5">Kembali ke Daftar</span>
                     </Link>
                 </Button>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-500">
                         Dipesan pada {new Date(order.created_at).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </span>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm border ${
+                        order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                        order.order_status === 'processing' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                        order.order_status === 'shipped' ? 'bg-indigo-100 text-indigo-800 border-indigo-200' :
+                        order.order_status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
+                        'bg-red-100 text-red-800 border-red-200'
+                    }`}>
+                        Status Server: {order.order_status}
                     </span>
                 </div>
             </div>
@@ -185,6 +207,51 @@ export default function OrderShow({ auth, order }) {
                     </div>
                 </div>
             </div>
+
+            {/* Cancel Reason Modal */}
+            {isCancelModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-red-600">Alasan Pembatalan</h2>
+                            <button onClick={() => setIsCancelModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <p className="text-sm text-gray-500 mb-6">Tuliskan pesan kepada pelanggan mengenai mengapa pesanan ini dibatalkan.</p>
+
+                        <div className="mb-6">
+                            <textarea
+                                value={statusData.cancel_reason}
+                                onChange={(e) => setStatusData('cancel_reason', e.target.value)}
+                                className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-red-500 focus:border-red-500 transition-colors px-4 py-3 resize-none"
+                                rows="4"
+                                placeholder="Contoh: Stok barang saat ini habis atau alamat tujuan tidak terjangkau kurir..."
+                            ></textarea>
+                            {errors.cancel_reason && <p className="text-red-500 text-xs mt-1">{errors.cancel_reason}</p>}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setIsCancelModalOpen(false)}
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleStatusUpdate}
+                                disabled={processing || !statusData.cancel_reason.trim()}
+                                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 transition-colors"
+                            >
+                                {processing ? 'Menyimpan...' : 'Kirim & Batalkan'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }

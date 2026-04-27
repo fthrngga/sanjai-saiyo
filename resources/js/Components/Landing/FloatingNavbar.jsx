@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ShoppingCart, Search, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, User, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import Dropdown from '@/Components/Dropdown';
@@ -7,7 +7,7 @@ import SearchInput from '@/Components/Landing/SearchInput';
 
 export default function FloatingNavbar() {
     const { url, props } = usePage();
-    const { auth, cart_count } = props;
+    const { auth, cart_count, notifications = [], unread_notifications_count = 0 } = props;
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [currentHash, setCurrentHash] = useState('');
@@ -94,7 +94,7 @@ export default function FloatingNavbar() {
 
     return (
         <>
-            <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 w-[90%] max-w-4xl ${scrolled ? 'top-4 scale-95' : ''}`}>
+            <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 w-[95%] xl:w-fit xl:min-w-[900px] max-w-[95%] xl:max-w-6xl ${scrolled ? 'top-4 scale-95' : ''}`}>
                 <nav className={`
                     backdrop-blur-md border border-white/20 shadow-2xl rounded-full px-6 py-3
                     flex items-center justify-between transition-colors duration-500
@@ -138,15 +138,61 @@ export default function FloatingNavbar() {
                             )}
                         </Link>
 
+                        {/* Notifications */}
+                        {auth.user && (
+                            <div className="relative flex items-center h-full">
+                                <Dropdown>
+                                    <Dropdown.Trigger>
+                                        <button className={`relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors ${scrolled ? 'text-white' : 'text-black'}`}>
+                                            <Bell className="w-5 h-5" />
+                                            {unread_notifications_count > 0 && (
+                                                <span className="absolute top-1 right-0 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                                                    {unread_notifications_count}
+                                                </span>
+                                            )}
+                                        </button>
+                                    </Dropdown.Trigger>
+
+                                    <Dropdown.Content align="right" width="96" contentClasses="py-2 bg-white ring-1 ring-black ring-opacity-5 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
+                                        <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white">
+                                            <h3 className="font-bold text-gray-900">Notifikasi</h3>
+                                            {unread_notifications_count > 0 && (
+                                                <Link href={route('notifications.markRead')} method="post" as="button" className="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                                    Tandai sudah dibaca
+                                                </Link>
+                                            )}
+                                        </div>
+                                        <div className="divide-y divide-gray-100">
+                                            {notifications.length > 0 ? (
+                                                notifications.map((notif) => (
+                                                    <Link key={notif.id} href={route('orders.index')} className={`block p-4 hover:bg-gray-50 transition-colors ${!notif.read_at ? 'bg-blue-50/50' : ''}`}>
+                                                        <p className="text-sm text-gray-800 mb-1 leading-snug">{notif.data.message}</p>
+                                                        {notif.data.cancel_reason && (
+                                                            <p className="text-xs text-red-600 italic mt-1 line-clamp-1">" {notif.data.cancel_reason} "</p>
+                                                        )}
+                                                        <span className="text-xs text-gray-500 mt-2 block">{new Date(notif.created_at).toLocaleString('id-ID')}</span>
+                                                    </Link>
+                                                ))
+                                            ) : (
+                                                <div className="p-6 text-center text-gray-500 text-sm">
+                                                    Tidak ada notifikasi
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Dropdown.Content>
+                                </Dropdown>
+                            </div>
+                        )}
+
                         {/* Auth Button / Profile */}
                         <div className="hidden md:block pl-2 border-l border-gray-300/30">
                             {auth.user ? (
                                 <div className="relative flex items-center h-full">
                                     <Dropdown>
                                         <Dropdown.Trigger>
-                                            <button className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all hover:opacity-70 ${url.startsWith('/profile') || url.startsWith('/orders') ? (scrolled ? 'text-yellow-400' : 'text-yellow-600') : (scrolled ? 'text-white' : 'text-black')}`}>
-                                                <User className="w-5 h-5" />
-                                                <span className="hidden lg:inline">{auth.user.name}</span>
+                                            <button className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all hover:opacity-70 whitespace-nowrap ${url.startsWith('/profile') || url.startsWith('/orders') ? (scrolled ? 'text-yellow-400' : 'text-yellow-600') : (scrolled ? 'text-white' : 'text-black')}`}>
+                                                <User className="w-5 h-5 shrink-0" />
+                                                <span className="hidden lg:inline-block whitespace-nowrap leading-tight mt-0.5">{auth.user.name}</span>
                                             </button>
                                         </Dropdown.Trigger>
 

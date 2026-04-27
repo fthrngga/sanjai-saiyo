@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Table already created in create_ecommerce_tables.php
+        Schema::table('orders', function (Blueprint $table) {
+            $table->boolean('is_admin_read')->default(false)->after('order_status');
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reviews');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropColumn('is_admin_read');
+        });
     }
 };

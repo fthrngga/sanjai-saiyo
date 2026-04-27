@@ -3,7 +3,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Link, useForm } from '@inertiajs/react';
-import { ChevronLeft, Save, Plus, Trash2, X, ImagePlus } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, X, ImagePlus } from 'lucide-react';
 import InputError from '@/Components/InputError';
 import { useState } from 'react';
 
@@ -77,10 +77,12 @@ export default function Edit({ product, categories }) {
 
     return (
         <AdminLayout title="Edit Produk">
-            <div className="max-w-4xl mx-auto">
-                <Link href={route('admin.products.index')} className="flex items-center text-sm text-gray-500 hover:text-gray-900 mb-6 transition-colors">
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Kembali
-                </Link>
+            <div className="w-full max-w-7xl mx-auto">
+                <Button variant="outline" className="gap-2 bg-white border-2 border-gray-400 font-semibold hover:border-gray-600 hover:bg-gray-50 shadow-sm transition-all mb-6 w-fit" asChild>
+                    <Link href={route('admin.products.index')}>
+                        <ArrowLeft className="w-5 h-5 flex-shrink-0" /> <span className="pt-0.5">Kembali ke Daftar</span>
+                    </Link>
+                </Button>
 
                 <form onSubmit={submit} className="space-y-6">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">

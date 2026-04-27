@@ -25,37 +25,30 @@ class CartController extends Controller
             'product_variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
-        $cartItem = \App\Models\Cart::where('user_id', auth()->id())
-            ->where('product_id', $request->product_id)
-            ->where('product_variant_id', $request->product_variant_id)
-            ->first();
+        $isBuyNow = $request->boolean('is_buy_now');
 
         // If it's a Buy Now action, deselect all existing cart items first
-        if ($request->is_buy_now) {
+        if ($isBuyNow) {
             \App\Models\Cart::where('user_id', auth()->id())->update(['is_selected' => false]);
         }
 
-        if ($cartItem) {
-            // For Buy Now, ignore adding to existing quantity, just set the quantity to what they chose this time
-            // Or add to it depending on logic. Usually Buy Now sets exact quantity.
-            if ($request->is_buy_now) {
-                $cartItem->quantity = $request->quantity;
-                $cartItem->is_selected = true;
-            } else {
-                $cartItem->quantity += $request->quantity;
-            }
-            $cartItem->save();
+        $cartItem = \App\Models\Cart::firstOrNew([
+            'user_id' => auth()->id(),
+            'product_id' => $request->product_id,
+            'product_variant_id' => $request->product_variant_id,
+        ]);
+
+        if ($isBuyNow) {
+            // For Buy Now, override quantity and forcefully select it
+            $cartItem->quantity = $request->quantity;
+            $cartItem->is_selected = true;
         } else {
-            \App\Models\Cart::create([
-                'user_id' => auth()->id(),
-                'product_id' => $request->product_id,
-                'product_variant_id' => $request->product_variant_id,
-                'quantity' => $request->quantity,
-                'is_selected' => $request->is_buy_now ? true : false, // Default is usually true or false in migration, force it here
-            ]);
+            $cartItem->quantity = ($cartItem->quantity ?? 0) + $request->quantity;
         }
 
-        if ($request->is_buy_now) {
+        $cartItem->save();
+
+        if ($isBuyNow) {
             return redirect()->route('checkout.index');
         }
 

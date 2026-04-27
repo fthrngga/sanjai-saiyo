@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Table already created in create_ecommerce_tables.php
+        Schema::table('orders', function (Blueprint $table) {
+            $table->text('cancel_reason')->nullable()->after('tracking_number');
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reviews');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropColumn('cancel_reason');
+        });
     }
 };

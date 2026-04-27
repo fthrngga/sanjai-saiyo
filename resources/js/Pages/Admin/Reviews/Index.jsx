@@ -1,20 +1,44 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/Admin/AdminLayout';
-import { Star, Trash2 } from 'lucide-react';
+import Modal from '@/Components/Modal';
+import { Star, Trash2, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Index({ reviews }) {
-    const { delete: destroy } = useForm();
     const [isDeleting, setIsDeleting] = useState(false);
+    const [selectedReviews, setSelectedReviews] = useState([]);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus ulasan ini?')) {
-            setIsDeleting(true);
-            destroy(route('admin.reviews.destroy', id), {
-                onFinish: () => setIsDeleting(false),
-                preserveScroll: true
-            });
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedReviews(reviews.data.map(r => r.id));
+        } else {
+            setSelectedReviews([]);
         }
+    };
+
+    const handleSelect = (id) => {
+        if (selectedReviews.includes(id)) {
+            setSelectedReviews(selectedReviews.filter(reviewId => reviewId !== id));
+        } else {
+            setSelectedReviews([...selectedReviews, id]);
+        }
+    };
+
+    const confirmBulkDelete = () => {
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleBulkDelete = () => {
+        setIsDeleting(true);
+        router.post(route('admin.reviews.bulkDestroy'), { ids: selectedReviews }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSelectedReviews([]);
+                setIsDeleteModalOpen(false);
+            },
+            onFinish: () => setIsDeleting(false),
+        });
     };
 
     return (
@@ -26,6 +50,16 @@ export default function Index({ reviews }) {
                     <h1 className="text-2xl font-bold text-gray-900">Ulasan Pelanggan</h1>
                     <p className="text-sm text-gray-500 mt-1">Pantau dan kelola ulasan yang masuk dari pelanggan</p>
                 </div>
+                {selectedReviews.length > 0 && (
+                    <button
+                        onClick={confirmBulkDelete}
+                        disabled={isDeleting}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Hapus {selectedReviews.length} Terpilih
+                    </button>
+                )}
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -33,12 +67,19 @@ export default function Index({ reviews }) {
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
                             <tr>
+                                <th className="px-6 py-4 w-10">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded border-gray-300 text-black shadow-sm focus:border-black focus:ring-black"
+                                        onChange={handleSelectAll}
+                                        checked={reviews.data.length > 0 && selectedReviews.length === reviews.data.length}
+                                    />
+                                </th>
                                 <th className="px-6 py-4 font-medium">Tanggal</th>
                                 <th className="px-6 py-4 font-medium">Pelanggan</th>
                                 <th className="px-6 py-4 font-medium">Produk</th>
                                 <th className="px-6 py-4 font-medium">Rating</th>
                                 <th className="px-6 py-4 font-medium">Komentar</th>
-                                <th className="px-6 py-4 font-medium text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -51,6 +92,14 @@ export default function Index({ reviews }) {
                             ) : (
                                 reviews.data.map((review) => (
                                     <tr key={review.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-gray-300 text-black shadow-sm focus:border-black focus:ring-black"
+                                                checked={selectedReviews.includes(review.id)}
+                                                onChange={() => handleSelect(review.id)}
+                                            />
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                                             {new Date(review.created_at).toLocaleDateString('id-ID', {
                                                 day: 'numeric',
@@ -72,16 +121,6 @@ export default function Index({ reviews }) {
                                         </td>
                                         <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
                                             {review.comment || '-'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                                            <button
-                                                onClick={() => handleDelete(review.id)}
-                                                disabled={isDeleting}
-                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-block"
-                                                title="Hapus Ulasan"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -110,6 +149,50 @@ export default function Index({ reviews }) {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} maxWidth="md">
+                <div className="p-6">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                            <AlertTriangle className="w-6 h-6 text-red-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Konfirmasi Penghapusan</h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                            Apakah Anda yakin ingin menghapus {selectedReviews.length} ulasan yang dipilih? Aksi ini tidak dapat dibatalkan.
+                        </p>
+                    </div>
+
+                    <div className="flex justify-end gap-3 mt-6">
+                        <button
+                            type="button"
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            disabled={isDeleting}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleBulkDelete}
+                            disabled={isDeleting}
+                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Menghapus...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-4 h-4" />
+                                    Ya, Hapus
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </AdminLayout>
     );
 }

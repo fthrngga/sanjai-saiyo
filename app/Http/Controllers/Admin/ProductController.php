@@ -34,12 +34,12 @@ class ProductController extends Controller
             'harga' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|array',
-            'gambar.*' => 'image|max:2048',
+            'gambar.*' => 'image|max:1048576',
             'variants' => 'required|array|min:1',
             'variants.*.name' => 'required|string|max:255',
             'variants.*.additional_price' => 'required|numeric|min:0',
             'variants.*.stock' => 'required|integer|min:0',
-            'variants.*.image' => 'nullable|image|max:2048',
+            'variants.*.image' => 'nullable|image|max:1048576',
         ]);
 
         $totalStock = collect($request->variants)->sum('stock');
@@ -105,13 +105,13 @@ class ProductController extends Controller
             'harga' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|array',
-            'gambar.*' => 'image|max:2048',
+            'gambar.*' => 'image|max:1048576',
             'existing_images' => 'nullable|array',
             'variants' => 'required|array|min:1',
             'variants.*.name' => 'required|string|max:255',
             'variants.*.additional_price' => 'required|numeric|min:0',
             'variants.*.stock' => 'required|integer|min:0',
-            'variants.*.image' => 'nullable',
+            'variants.*.image' => 'nullable|image|max:1048576',
         ]);
 
         $totalStock = collect($request->variants)->sum('stock');

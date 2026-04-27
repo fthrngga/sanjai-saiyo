@@ -113,8 +113,8 @@ export default function Detail({ product, related_products }) {
 
                 <div className="lg:grid lg:grid-cols-12 lg:gap-12">
                     {/* Left Column: Images (4 cols) */}
-                    <div className="lg:col-span-4 mb-8 lg:mb-0">
-                        <div className="aspect-square bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm sticky top-24">
+                    <div className="lg:col-span-4 mb-8 lg:mb-0 lg:sticky lg:top-24 lg:self-start">
+                        <div className="aspect-square bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
                             {mainImage ? (
                                 <img
                                     src={`/storage/${mainImage}`}

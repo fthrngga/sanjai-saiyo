@@ -1,9 +1,18 @@
-import { Link, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { LayoutDashboard, ShoppingBag, Package, FileText, Star, CheckSquare, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function AdminSidebar() {
-    const { url } = usePage();
+    const { url, unread_orders_count } = usePage().props;
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({ only: ['unread_orders_count'], preserveState: true, preserveScroll: true });
+        }, 15000); // Poll every 15 seconds
+
+        return () => clearInterval(interval);
+    }, []);
 
     const links = [
         { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard },
@@ -34,20 +43,26 @@ export default function AdminSidebar() {
                             isActive = false;
                         }
                     }
-
                     return (
                         <Link
                             key={link.name}
                             href={link.href}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                                "flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                                 isActive
                                     ? "bg-gray-100 text-gray-900"
                                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                             )}
                         >
-                            <Icon size={20} />
-                            {link.name}
+                            <div className="flex items-center gap-3">
+                                <Icon size={20} />
+                                {link.name}
+                            </div>
+                            {link.name === 'Pesanan' && unread_orders_count > 0 && (
+                                <span className="bg-red-500 text-white min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full text-xs font-bold animate-pulse">
+                                    {unread_orders_count}
+                                </span>
+                            )}
                         </Link>
                     )
                 })}

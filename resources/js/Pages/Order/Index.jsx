@@ -139,6 +139,12 @@ export default function OrderIndex({ orders }) {
                                                     Resi: {order.tracking_number}
                                                 </div>
                                             )}
+                                            {order.order_status === 'cancelled' && order.cancel_reason && (
+                                                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg">
+                                                    <h6 className="text-xs font-bold text-red-800 mb-1 uppercase tracking-wider">Alasan Pembatalan:</h6>
+                                                    <p className="text-sm text-red-700">{order.cancel_reason}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

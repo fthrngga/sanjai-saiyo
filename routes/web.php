@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
     Route::get('admin/sales', [\App\Http\Controllers\Admin\SaleController::class, 'index'])->name('admin.sales.index');
     Route::get('admin/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('admin.reviews.index');
+    Route::post('admin/reviews/bulk-destroy', [\App\Http\Controllers\Admin\ReviewController::class, 'bulkDestroy'])->name('admin.reviews.bulkDestroy');
     Route::delete('admin/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 });
 
@@ -89,6 +90,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{order}/complete', [\App\Http\Controllers\OrderController::class, 'complete'])->name('orders.complete');
+
+    Route::post('/notifications/mark-read', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
+    })->name('notifications.markRead');
 
     Route::post('/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
 
