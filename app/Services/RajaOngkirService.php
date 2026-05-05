@@ -108,8 +108,10 @@ class RajaOngkirService
         // Komerce uses 'district' for Kecamatan, and 'sub-district' endpoint for Kelurahan.
         // Let's assume 'subdistrict' refers to Kelurahan here.
 
-        $originId = $this->originSubdistrictId ?: $this->originCityId;
-        $originType = $this->originSubdistrictId ? 'subdistrict' : 'city';
+        // Force origin to City level to prevent 404 errors from JNE & TIKI
+        // (Courier pricing matrices usually don't support Subdistrict-level origin routing)
+        $originId = $this->originCityId;
+        $originType = 'city';
 
         $payload = [
             'origin' => $originId,

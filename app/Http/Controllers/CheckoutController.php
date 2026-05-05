@@ -68,9 +68,9 @@ class CheckoutController extends Controller
         if ($weight == 0)
             return response()->json([]);
 
-        // Determine destination
-        $destinationId = $request->subdistrict_id ?? $request->district_id ?? $request->city_id;
-        $destinationType = $request->subdistrict_id ? 'subdistrict' : ($request->district_id ? 'district' : 'city');
+        // Fallback to district instead of subdistrict for better courier compatibility (JNE, TIKI)
+        $destinationId = $request->district_id ?? $request->city_id;
+        $destinationType = $request->district_id ? 'district' : 'city';
 
         $costs = $this->rajaOngkir->getCost($destinationId, $weight, $request->courier, $destinationType);
         return response()->json($costs);
@@ -105,19 +105,24 @@ class CheckoutController extends Controller
         }
 
         $shippingCost = $request->shipping_cost;
-        $grandTotal = $itemsTotal + $shippingCost;
+        $totalPrice = $itemsTotal + $shippingCost;
+        $kodeUnik = rand(100, 999);
+        $grandTotal = $totalPrice + $kodeUnik;
 
         // Create Order
         $order = \App\Models\Order::create([
             'user_id' => auth()->id(),
             'address_snapshot' => $request->only(['recipient_name', 'phone_number', 'full_address', 'province_name', 'city_name', 'province_id', 'city_id']),
-            'total_price' => $grandTotal,
+            'total_price' => $totalPrice,
             'shipping_cost' => $shippingCost,
             'shipping_courier' => $request->courier,
             'shipping_service' => $request->shipping_service,
-            'payment_status' => 'paid', // Still dummy paid
+            'payment_status' => 'pending', 
             'order_status' => 'pending',
-            'snap_token' => 'dummy-snap-token-' . uniqid(),
+            'kode_unik' => $kodeUnik,
+            'grand_total' => $grandTotal,
+            'status_pembayaran' => 'unpaid',
+            'snap_token' => null,
         ]);
 
         foreach ($cartItems as $item) {

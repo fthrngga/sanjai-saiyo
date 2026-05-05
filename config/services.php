@@ -42,4 +42,8 @@ return [
         'origin_subdistrict_id' => env('RAJAONGKIR_ORIGIN_SUBDISTRICT_ID', '48946'), // Sarilamak
     ],
 
+    'qris' => [
+        'static_string' => env('QRIS_STATIC_STRING', ''),
+    ],
+
 ];

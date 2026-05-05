@@ -4,6 +4,7 @@ import Navbar from '@/Components/Landing/Navbar';
 import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 
 export default function CartIndex({ cartItems }) {
+    const [itemToDelete, setItemToDelete] = useState(null);
     // Calculate total for SELECTED items only
     const selectedItems = cartItems.filter(item => item.is_selected);
     const total = selectedItems.reduce((sum, item) => {
@@ -23,8 +24,13 @@ export default function CartIndex({ cartItems }) {
     };
 
     const removeItem = (item) => {
-        if (confirm('Hapus item ini dari keranjang?')) {
-            router.delete(route('cart.destroy', item.id), { preserveScroll: true });
+        setItemToDelete(item);
+    };
+
+    const confirmRemoveItem = () => {
+        if (itemToDelete) {
+            router.delete(route('cart.destroy', itemToDelete.id), { preserveScroll: true });
+            setItemToDelete(null);
         }
     };
 
@@ -164,6 +170,33 @@ export default function CartIndex({ cartItems }) {
                         <Link href="/" className="inline-block px-6 py-2.5 bg-black text-white font-medium rounded-full hover:bg-gray-800 transition-colors">
                             Mulai Belanja
                         </Link>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {itemToDelete && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center transform transition-all scale-100">
+                            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="w-8 h-8" />
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Hapus Item?</h2>
+                            <p className="text-sm text-gray-500 mb-6">Apakah Anda yakin ingin menghapus <strong>{itemToDelete.product.nama_produk}</strong> dari keranjang Anda?</p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setItemToDelete(null)}
+                                    className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={confirmRemoveItem}
+                                    className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors"
+                                >
+                                    Ya, Hapus
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </main>

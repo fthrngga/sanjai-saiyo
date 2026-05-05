@@ -78,9 +78,67 @@ class OrderController extends Controller
         ]);
 
         if ($oldStatus !== $validated['order_status']) {
+            // Jika berubah menjadi dikirim atau selesai, kurangi stok (jika belum pernah dikurangi)
+            if (!in_array($oldStatus, ['shipped', 'completed']) && in_array($validated['order_status'], ['shipped', 'completed'])) {
+                $order->loadMissing('items.product');
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    if ($item->product_variant_id) {
+                        $variant = \App\Models\ProductVariant::find($item->product_variant_id);
+                        if ($variant) {
+                            $variant->decrement('stock', $item->quantity);
+                            if ($variant->stock < 10) {
+                                $admin = \App\Models\User::where('role', 'admin')->first();
+                                if ($admin) {
+                                    $admin->notify(new \App\Notifications\LowStockNotification($product->nama_produk, $variant->name, $variant->stock));
+                                }
+                            }
+                        }
+                    } else {
+                        if ($product) {
+                            $product->decrement('stok', $item->quantity);
+                            if ($product->stok < 10) {
+                                $admin = \App\Models\User::where('role', 'admin')->first();
+                                if ($admin) {
+                                    $admin->notify(new \App\Notifications\LowStockNotification($product->nama_produk, null, $product->stok));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             $order->user->notify(new \App\Notifications\OrderStatusChanged($order));
         }
 
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    public function verifyPayment(Request $request, Order $order)
+    {
+        $request->validate([
+            'status_pembayaran' => 'required|in:paid,failed',
+            'payment_reject_reason' => 'nullable|string',
+        ]);
+
+        $status = $request->status_pembayaran;
+
+        if ($status === 'paid') {
+            $order->update([
+                'status_pembayaran' => 'paid',
+                'payment_status' => 'paid',
+                'order_status' => 'processing',
+            ]);
+            // send notification
+            $order->user->notify(new \App\Notifications\OrderStatusChanged($order));
+            return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi.');
+        } else {
+            $order->update([
+                'status_pembayaran' => 'failed', // Ubah ke failed agar user tahu
+                'bukti_pembayaran' => null, // Hapus bukti yang lama
+                'cancel_reason' => $request->payment_reject_reason ?? 'Bukti pembayaran tidak valid atau nominal tidak sesuai.',
+            ]);
+            return redirect()->back()->with('success', 'Pembayaran ditolak. Pelanggan dapat mengunggah ulang bukti pembayaran.');
+        }
     }
 }

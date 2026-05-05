@@ -17,7 +17,11 @@ class Order extends Model
         'snap_token',
         'order_status',
         'tracking_number',
-        'cancel_reason'
+        'cancel_reason',
+        'kode_unik',
+        'grand_total',
+        'status_pembayaran',
+        'bukti_pembayaran'
     ];
 
     protected $casts = [

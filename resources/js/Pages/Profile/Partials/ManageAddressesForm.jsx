@@ -13,6 +13,7 @@ export default function ManageAddressesForm({ className = '', addresses = [], pr
     
     // Check if we are currently editing an address
     const [editingId, setEditingId] = useState(null);
+    const [addressToDelete, setAddressToDelete] = useState(null);
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         label: '',
@@ -106,9 +107,14 @@ export default function ManageAddressesForm({ className = '', addresses = [], pr
         router.put(route('user.addresses.setPrimary', id), {}, { preserveScroll: true });
     };
 
-    const deleteAddress = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus alamat ini?')) {
-            router.delete(route('user.addresses.destroy', id), { preserveScroll: true });
+    const deleteAddress = (address) => {
+        setAddressToDelete(address);
+    };
+
+    const confirmDeleteAddress = () => {
+        if (addressToDelete) {
+            router.delete(route('user.addresses.destroy', addressToDelete.id), { preserveScroll: true });
+            setAddressToDelete(null);
         }
     };
 
@@ -362,7 +368,7 @@ export default function ManageAddressesForm({ className = '', addresses = [], pr
                                                 </button>
                                                 <button 
                                                     type="button"
-                                                    onClick={() => deleteAddress(address.id)}
+                                                    onClick={() => deleteAddress(address)}
                                                     className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                                                 >
                                                     Hapus
@@ -374,6 +380,35 @@ export default function ManageAddressesForm({ className = '', addresses = [], pr
                             </div>
                         ))
                     )}
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {addressToDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center transform transition-all scale-100 dark:bg-gray-800">
+                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-red-900/30 dark:text-red-400">
+                            <Trash2 className="w-8 h-8" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2 dark:text-white">Hapus Alamat?</h2>
+                        <p className="text-sm text-gray-500 mb-6 dark:text-gray-400">Apakah Anda yakin ingin menghapus alamat <strong>{addressToDelete.label || 'ini'}</strong>?</p>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setAddressToDelete(null)}
+                                className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDeleteAddress}
+                                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors"
+                            >
+                                Ya, Hapus
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </section>

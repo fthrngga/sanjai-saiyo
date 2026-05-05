@@ -66,6 +66,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
     Route::resource('admin/products', \App\Http\Controllers\Admin\ProductController::class)->names('admin.products');
     Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
+    Route::patch('admin/orders/{order}/verify-payment', [\App\Http\Controllers\Admin\OrderController::class, 'verifyPayment'])->name('admin.orders.verifyPayment');
     Route::get('admin/sales', [\App\Http\Controllers\Admin\SaleController::class, 'index'])->name('admin.sales.index');
     Route::get('admin/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('admin.reviews.index');
     Route::post('admin/reviews/bulk-destroy', [\App\Http\Controllers\Admin\ReviewController::class, 'bulkDestroy'])->name('admin.reviews.bulkDestroy');
@@ -86,7 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/cost', [\App\Http\Controllers\CheckoutController::class, 'getShippingCost'])->name('checkout.cost');
 
     Route::get('/payment/{order}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payment.show');
-    Route::post('/payment/{order}/simulate', [\App\Http\Controllers\PaymentController::class, 'simulate'])->name('payment.simulate');
+    Route::post('/payment/{order}/upload-proof', [\App\Http\Controllers\PaymentController::class, 'uploadProof'])->name('payment.uploadProof');
 
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{order}/complete', [\App\Http\Controllers\OrderController::class, 'complete'])->name('orders.complete');

@@ -272,14 +272,7 @@ export default function Detail({ product, related_products }) {
                                 </button>
                             </div>
 
-                            <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-gray-100 text-gray-400">
-                                <button className="flex items-center gap-1.5 hover:text-red-500 text-sm font-medium transition-colors">
-                                    <Heart className="w-4 h-4" /> Wishlist
-                                </button>
-                                <button className="flex items-center gap-1.5 hover:text-blue-500 text-sm font-medium transition-colors">
-                                    <Share2 className="w-4 h-4" /> Share
-                                </button>
-                            </div>
+
                         </div>
                     </div>
                 </div>

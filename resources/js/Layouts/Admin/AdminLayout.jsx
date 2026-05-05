@@ -1,11 +1,16 @@
 import AdminSidebar from './AdminSidebar';
-import { Head, usePage } from '@inertiajs/react';
-import { User, CheckCircle, X } from 'lucide-react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { User, CheckCircle, X, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function AdminLayout({ children, title }) {
-    const { auth, flash } = usePage().props;
+    const { auth, flash, notifications = [], unread_notifications_count = 0 } = usePage().props;
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showNotif, setShowNotif] = useState(false);
+
+    const markAsRead = () => {
+        router.post(route('notifications.markRead'), {}, { preserveScroll: true });
+    };
 
     useEffect(() => {
         if (flash?.success) {
@@ -31,6 +36,53 @@ export default function AdminLayout({ children, title }) {
                             <span className="text-sm font-medium text-gray-900">{auth.user.name}</span>
                             <span className="text-xs text-gray-500 capitalize">{auth.user.role}</span>
                         </div>
+                        <div className="relative">
+                            <button 
+                                onClick={() => setShowNotif(!showNotif)}
+                                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition relative"
+                            >
+                                <Bell size={20} />
+                                {unread_notifications_count > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white">
+                                        {unread_notifications_count}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Notifications Dropdown */}
+                            {showNotif && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                                    <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                        <h3 className="font-bold text-gray-900">Notifikasi</h3>
+                                        {unread_notifications_count > 0 && (
+                                            <button 
+                                                onClick={markAsRead} 
+                                                className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                                            >
+                                                Tandai semua dibaca
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto">
+                                        {notifications.length > 0 ? (
+                                            notifications.map((notif) => (
+                                                <div key={notif.id} className={`p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${notif.read_at ? 'opacity-60' : 'bg-blue-50/30'}`}>
+                                                    <p className="text-sm text-gray-800">{notif.data.message || 'Notifikasi baru'}</p>
+                                                    <span className="text-xs text-gray-400 mt-1 block">
+                                                        {new Date(notif.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="p-6 text-center text-gray-500 text-sm">
+                                                Tidak ada notifikasi
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                             <User className="text-gray-600" size={20} />
                         </div>
