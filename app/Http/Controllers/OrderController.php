@@ -13,7 +13,7 @@ class OrderController extends Controller
         $orders = Order::with(['items.product', 'reviews'])
             ->where('user_id', auth()->id())
             ->latest()
-            ->get();
+            ->paginate(5);
 
         return Inertia::render('Order/Index', [
             'orders' => $orders

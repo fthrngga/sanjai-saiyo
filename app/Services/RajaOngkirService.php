@@ -108,10 +108,14 @@ class RajaOngkirService
         // Komerce uses 'district' for Kecamatan, and 'sub-district' endpoint for Kelurahan.
         // Let's assume 'subdistrict' refers to Kelurahan here.
 
-        // Force origin to City level to prevent 404 errors from JNE & TIKI
-        // (Courier pricing matrices usually don't support Subdistrict-level origin routing)
-        $originId = $this->originCityId;
-        $originType = 'city';
+        // Cek apakah Kecamatan (District) Origin diset
+        if ($this->originSubdistrictId) {
+            $originId = $this->originSubdistrictId;
+            $originType = 'district';
+        } else {
+            $originId = $this->originCityId;
+            $originType = 'city';
+        }
 
         $payload = [
             'origin' => $originId,
@@ -121,6 +125,14 @@ class RajaOngkirService
             'weight' => $weight,
             'courier' => $courier,
         ];
+
+        // Cetak debug log ke console artisan serve
+        error_log("\n========== DEBUG RAJAONGKIR ==========");
+        error_log("ORIGIN        : " . $originId . " (" . $originType . ")");
+        error_log("DESTINATION   : " . $destinationId . " (" . $destinationType . ")");
+        error_log("WEIGHT (gram) : " . $weight);
+        error_log("COURIER       : " . strtoupper($courier));
+        error_log("========================================\n");
 
         \Illuminate\Support\Facades\Log::info('RajaOngkir Cost Payload: ', $payload);
 

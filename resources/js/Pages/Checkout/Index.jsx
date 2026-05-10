@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
-import { Check, Truck, CreditCard, ChevronDown, MapPin } from 'lucide-react';
+import { Check, CreditCard, ChevronDown, MapPin } from 'lucide-react';
 import axios from 'axios';
 
 export default function CheckoutIndex({ cartItems, provinces, userAddresses = [] }) {
@@ -18,6 +18,13 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
     const [subdistricts, setSubdistricts] = useState([]);
     const [shippingOptions, setShippingOptions] = useState([]);
     const [selectedShipping, setSelectedShipping] = useState(null);
+
+    // Objek Logo Kurir memanggil langsung dari folder public/img/
+    const courierLogos = {
+        jne: '/img/jne.png',
+        tiki: '/img/tiki.png',
+        pos: '/img/pos.png'
+    };
 
     const { data, setData, post, processing, errors } = useForm({
         recipient_name: primaryAddress?.recipient_name || '',
@@ -99,16 +106,8 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Set province name based on ID
         const selectedProv = provinces.find(p => p.id == data.province_id);
         const selectedCity = cities.find(c => c.id == data.city_id);
-
-        // Ensure we send correct names. Inertia's data might lag if we rely solely on state updates triggered just now.
-        // However, setData updates are typically fast. 
-        // Better: We can pass these directly if we want, or rely on what we set in onChange.
-        // Let's rely on what we set in onChange + safety check here if needed? 
-        // Actually, with react state, sticking to "data" is fine, but we need to ensure "province_name" was set.
-        // Our onChange handlers set them.
 
         post(route('checkout.store'));
     };
@@ -194,7 +193,6 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                                     </div>
                                     <p className="text-gray-700">{data.full_address}</p>
                                     <p className="text-gray-500 text-sm mt-1">
-                                        {/* Keterangan Region, ID disembunyikan dalam form tapi dikirim saat post */}
                                         Pastikan alamat di atas sudah benar untuk menghindari kesalahan pengiriman.
                                     </p>
                                 </div>
@@ -212,10 +210,18 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                                     <div
                                         key={c}
                                         onClick={() => setData('courier', c)}
-                                        className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${data.courier === c ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                        // Ubah style di sini: menggunakan border-2 border-black saat aktif, border-gray-200 saat tidak
+                                        className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${data.courier === c ? 'border-2 border-black bg-white' : 'border border-gray-200 hover:border-gray-300 bg-white'}`}
                                     >
-                                        <Truck className="w-6 h-6" />
-                                        <span className="uppercase font-bold">{c}</span>
+                                        <div className="h-12 w-full flex items-center justify-center">
+                                            {/* Ubah style di sini: hapus efek grayscale */}
+                                            <img 
+                                                src={courierLogos[c]} 
+                                                alt={c.toUpperCase()} 
+                                                className="max-h-full max-w-[100px] object-contain"
+                                            />
+                                        </div>
+                                        <span className={`uppercase font-bold text-sm tracking-wider ${data.courier === c ? 'text-black' : 'text-gray-500'}`}>{c}</span>
                                     </div>
                                 ))}
                             </div>
@@ -258,7 +264,7 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                                     <span>Rp {itemsTotal.toLocaleString('id-ID')}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600 font-medium">
-                                    <span>Ongkos Kirim ({data.courier?.toUpperCase()})</span>
+                                    <span>Ongkos Kirim ({data.courier?.toUpperCase() || '-'})</span>
                                     <span>Rp {data.shipping_cost.toLocaleString('id-ID')}</span>
                                 </div>
                                 <div className="h-px bg-gray-100 my-2"></div>

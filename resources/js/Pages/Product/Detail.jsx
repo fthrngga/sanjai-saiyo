@@ -272,14 +272,13 @@ export default function Detail({ product, related_products }) {
                                 </button>
                             </div>
 
-
                         </div>
                     </div>
                 </div>
 
                 {/* Reviews Section */}
                 <div className="mt-20 border-t border-gray-100 pt-10">
-                    <div className="lg:w-2/3">
+                    <div className="w-full">
                         <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
                             <MessageSquare className="w-6 h-6" /> Ulasan Pelanggan
                             <span className="text-lg font-normal text-gray-500 ml-2">({reviews.length})</span>
@@ -293,27 +292,33 @@ export default function Detail({ product, related_products }) {
                             <div className="space-y-6">
                                 {reviews.map((review) => (
                                     <div key={review.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500">
-                                                    {review.user?.name?.charAt(0).toUpperCase() || 'U'}
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900 leading-none mb-1">{review.user?.name || 'Pengguna'}</h4>
-                                                    <div className="flex text-yellow-400 text-sm">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <svg key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
-                                                        ))}
-                                                    </div>
-                                                </div>
+                                        <div className="flex items-start gap-4">
+                                            {/* Foto Profil Avatar */}
+                                            <div className="w-10 h-10 shrink-0 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500 mt-1">
+                                                {review.user?.name?.charAt(0).toUpperCase() || 'U'}
                                             </div>
-                                            <span className="text-sm text-gray-400">
-                                                {new Date(review.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                            </span>
+                                            
+                                            {/* Konten Ulasan (Nama, Bintang, Tanggal & Komentar) */}
+                                            <div className="flex-1">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900 leading-none mb-1.5">{review.user?.name || 'Pengguna'}</h4>
+                                                        <div className="flex text-yellow-400 text-sm">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <svg key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-sm text-gray-400 shrink-0 ml-4">
+                                                        {new Date(review.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    </span>
+                                                </div>
+                                                
+                                                {review.comment && (
+                                                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                                                )}
+                                            </div>
                                         </div>
-                                        {review.comment && (
-                                            <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -345,6 +350,7 @@ export default function Detail({ product, related_products }) {
                     <p className="text-gray-400 text-sm">&copy; 2024 Sanjai Saiyo. Premium Authentic Padang Chips.</p>
                 </div>
             </footer>
+            
             {/* Login Modal */}
             {showLoginModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">

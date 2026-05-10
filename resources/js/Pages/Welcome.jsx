@@ -99,7 +99,7 @@ export default function Welcome({ auth, products, categories }) {
                             <div className="max-w-xl">
                                 <span className="text-yellow-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pilih Rasa Favoritmu</span>
                                 <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-                                    Eksplorasi
+                                    Menu Terlaris
                                 </h2>
                             </div>
                             <Link href="/search" className="hidden md:inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 hover:border-yellow-600 transition-colors">
@@ -108,7 +108,8 @@ export default function Welcome({ auth, products, categories }) {
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-8">
-                            {products.map((product) => (
+                            {/* PERUBAHAN DI SINI: Menambahkan .slice(0, 8) */}
+                            {products.slice(0, 8).map((product) => (
                                 <Link
                                     key={product.id}
                                     href={route('products.show', product.id)}

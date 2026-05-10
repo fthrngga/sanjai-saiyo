@@ -167,7 +167,7 @@ export default function CartIndex({ cartItems }) {
                         </div>
                         <h2 className="text-xl font-bold text-gray-900 mb-2">Keranjang Anda Kosong</h2>
                         <p className="text-gray-500 mb-6">Yuk isi dengan cemilan favoritmu!</p>
-                        <Link href="/" className="inline-block px-6 py-2.5 bg-black text-white font-medium rounded-full hover:bg-gray-800 transition-colors">
+                        <Link href="/#catalog" className="inline-block px-6 py-2.5 bg-black text-white font-medium rounded-full hover:bg-gray-800 transition-colors">
                             Mulai Belanja
                         </Link>
                     </div>

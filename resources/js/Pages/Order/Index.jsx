@@ -1,10 +1,16 @@
 import React from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
-import { Package, Truck, Clock, CheckCircle } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function OrderIndex({ orders }) {
+    // orders is now a Laravel paginator object: { data, current_page, last_page, links, ... }
+    const orderList = orders.data ?? orders;
     const [reviewData, setReviewData] = React.useState(null);
+
+    const goToPage = (url) => {
+        if (url) router.get(url, {}, { preserveScroll: false });
+    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -37,7 +43,7 @@ export default function OrderIndex({ orders }) {
                     Pesanan Saya
                 </h1>
 
-                {orders.length === 0 ? (
+                {orderList.length === 0 ? (
                     <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                         <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-gray-900">Belum ada pesanan</h3>
@@ -48,7 +54,7 @@ export default function OrderIndex({ orders }) {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {orders.map((order) => (
+                        {orderList.map((order) => (
                             <div key={order.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <div className="bg-gray-50 px-6 py-4 flex flex-wrap gap-4 justify-between items-center border-b border-gray-200">
                                     <div className="flex gap-4 text-sm text-gray-500">
@@ -150,6 +156,50 @@ export default function OrderIndex({ orders }) {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {orders.last_page > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-10">
+                        {/* Prev button */}
+                        <button
+                            onClick={() => goToPage(orders.prev_page_url)}
+                            disabled={!orders.prev_page_url}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" /> Sebelumnya
+                        </button>
+
+                        {/* Page numbers */}
+                        <div className="flex items-center gap-1">
+                            {orders.links
+                                .filter(link => !link.label.includes('Previous') && !link.label.includes('Next'))
+                                .map((link, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => goToPage(link.url)}
+                                        disabled={!link.url}
+                                        className={[
+                                            'w-10 h-10 rounded-xl text-sm font-bold transition-all',
+                                            link.active
+                                                ? 'bg-amber-500 text-white shadow-md shadow-amber-200'
+                                                : 'border border-gray-200 text-gray-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200',
+                                        ].join(' ')}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ))
+                            }
+                        </div>
+
+                        {/* Next button */}
+                        <button
+                            onClick={() => goToPage(orders.next_page_url)}
+                            disabled={!orders.next_page_url}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Selanjutnya <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
             </main>

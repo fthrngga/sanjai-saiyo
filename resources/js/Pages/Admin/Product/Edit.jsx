@@ -23,6 +23,7 @@ export default function Edit({ product, categories }) {
     });
 
     const [previews, setPreviews] = useState([]); // For newly added images previews
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // index of variant to delete
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -62,6 +63,12 @@ export default function Edit({ product, categories }) {
         const newVariants = [...data.variants];
         newVariants.splice(index, 1);
         setData('variants', newVariants);
+        setDeleteConfirm(null); // tutup modal setelah hapus
+    };
+
+    const handleDeleteClick = (index) => {
+        if (data.variants.length <= 1) return; // minimal 1 varian
+        setDeleteConfirm(index);
     };
 
     const updateVariant = (index, field, value) => {
@@ -75,7 +82,7 @@ export default function Edit({ product, categories }) {
         post(route('admin.products.update', product.id));
     };
 
-    return (
+    return (<>
         <AdminLayout title="Edit Produk">
             <div className="w-full max-w-7xl mx-auto">
                 <Button variant="outline" className="gap-2 bg-white border-2 border-gray-400 font-semibold hover:border-gray-600 hover:bg-gray-50 shadow-sm transition-all mb-6 w-fit" asChild>
@@ -213,7 +220,7 @@ export default function Edit({ product, categories }) {
                                             type="button"
                                             variant="ghost"
                                             className="text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
-                                            onClick={() => removeVariant(index)}
+                                            onClick={() => handleDeleteClick(index)}
                                             disabled={data.variants.length <= 1}
                                         >
                                             <Trash2 className="w-5 h-5" />
@@ -293,5 +300,36 @@ export default function Edit({ product, categories }) {
                 </form>
             </div>
         </AdminLayout>
-    );
+
+        {/* Modal Konfirmasi Hapus Varian */}
+        {deleteConfirm !== null && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-center justify-center w-14 h-14 bg-red-50 rounded-full mx-auto mb-4">
+                        <Trash2 className="w-7 h-7 text-red-500" />
+                    </div>
+                    <h3 className="text-xl font-extrabold text-gray-900 text-center mb-2">Hapus Varian?</h3>
+                    <p className="text-sm text-gray-500 text-center mb-6">
+                        Varian <span className="font-bold text-gray-800">"{data.variants[deleteConfirm]?.name || 'ini'}"</span> akan dihapus secara permanen setelah Anda menyimpan perubahan.
+                    </p>
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setDeleteConfirm(null)}
+                            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => removeVariant(deleteConfirm)}
+                            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-md shadow-red-200"
+                        >
+                            Ya, Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+    </>);
 }
