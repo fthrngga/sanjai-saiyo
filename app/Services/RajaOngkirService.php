@@ -9,12 +9,14 @@ class RajaOngkirService
     protected $apiKey;
     protected $baseUrl;
     protected $originCityId;
+    protected $originSubdistrictId;
 
     public function __construct()
     {
         $this->apiKey = config('services.rajaongkir.key');
         $this->baseUrl = rtrim(config('services.rajaongkir.base_url'), '/');
         $this->originCityId = config('services.rajaongkir.origin_city_id');
+        $this->originSubdistrictId = config('services.rajaongkir.origin_subdistrict_id');
     }
 
     public function getProvinces()
@@ -106,14 +108,31 @@ class RajaOngkirService
         // Komerce uses 'district' for Kecamatan, and 'sub-district' endpoint for Kelurahan.
         // Let's assume 'subdistrict' refers to Kelurahan here.
 
+        // Cek apakah Kecamatan (District) Origin diset
+        if ($this->originSubdistrictId) {
+            $originId = $this->originSubdistrictId;
+            $originType = 'district';
+        } else {
+            $originId = $this->originCityId;
+            $originType = 'city';
+        }
+
         $payload = [
-            'origin' => $this->originCityId,
-            'origin_type' => 'city',
+            'origin' => $originId,
+            'origin_type' => $originType,
             'destination' => $destinationId,
             'destination_type' => $destinationType,
             'weight' => $weight,
             'courier' => $courier,
         ];
+
+        // Cetak debug log ke console artisan serve
+        error_log("\n========== DEBUG RAJAONGKIR ==========");
+        error_log("ORIGIN        : " . $originId . " (" . $originType . ")");
+        error_log("DESTINATION   : " . $destinationId . " (" . $destinationType . ")");
+        error_log("WEIGHT (gram) : " . $weight);
+        error_log("COURIER       : " . strtoupper($courier));
+        error_log("========================================\n");
 
         \Illuminate\Support\Facades\Log::info('RajaOngkir Cost Payload: ', $payload);
 

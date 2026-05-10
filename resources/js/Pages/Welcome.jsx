@@ -6,7 +6,7 @@ import { ArrowRight, Star, Truck, ShieldCheck } from 'lucide-react';
 export default function Welcome({ auth, products, categories }) {
     return (
         <div className="bg-white min-h-screen font-sans text-gray-900 antialiased selection:bg-yellow-200 selection:text-black">
-            <Head title="Premium Authenticity" />
+            <Head title="Cita Rasa Asli Premium" />
 
             <FloatingNavbar />
 
@@ -21,16 +21,13 @@ export default function Welcome({ auth, products, categories }) {
                         </div>
 
                         <div className="relative">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 text-xs font-bold uppercase tracking-wider mb-6 bg-gray-50">
-                                <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-                                New Collection 2026
-                            </div>
+
                             <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-4">
                                 SANJAI <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-700 italic font-serif pr-2">SAIYO</span>
                             </h1>
                             <p className="text-gray-500 text-lg md:text-xl font-medium max-w-md leading-relaxed mb-8">
-                                Taste the authentic heritage of Minangkabau in every crunch. Crafted with passion, delivered with pride.
+                                Rasakan sentuhan bumbu rempah Minangkabau di setiap gigitannya. Dibuat dengan sepenuh hati, Hadirkan kemewahan cita rasa di setiap momen istimewa Anda.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4">
@@ -49,47 +46,17 @@ export default function Welcome({ auth, products, categories }) {
                                 </Link>
                             </div>
 
-                            {/* Trust Indicators */}
-                            <div className="mt-12 flex items-center gap-8 border-t border-gray-100 pt-8">
-                                <div className="flex -space-x-4">
-                                    {[1, 2, 3, 4].map(i => (
-                                        <div key={i} className="w-10 h-10 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-bold text-gray-400">
-                                            {/* Placeholder for user avatars */}
-                                            U{i}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div>
-                                    <div className="flex text-yellow-500 text-sm">
-                                        <Star className="w-4 h-4 fill-current" />
-                                        <Star className="w-4 h-4 fill-current" />
-                                        <Star className="w-4 h-4 fill-current" />
-                                        <Star className="w-4 h-4 fill-current" />
-                                        <Star className="w-4 h-4 fill-current" />
-                                    </div>
-                                    <p className="text-xs font-bold text-gray-900 mt-1">10k+ Happy Customers</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
                     {/* Right Column - Visual */}
                     <div className="w-full md:w-1/2 h-[50vh] md:h-full bg-gray-100 relative order-1 md:order-2 group overflow-hidden">
                         <img
-                            src="/img/hero-lifestyle.png"
+                            src="/img/hero_sanjai_hd.png"
                             alt="Lifestyle"
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent md:bg-gradient-to-l md:from-transparent md:to-white/10 opacity-60"></div>
-
-                        {/* Floating Card */}
-                        <div className="absolute bottom-8 left-8 right-8 md:left-auto md:right-12 md:bottom-12 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl text-white max-w-xs transform md:translate-y-8 opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 transition-all duration-700 delay-300">
-                            <p className="font-serif italic text-lg opacity-90">"The best keripik sanjai I've ever tasted. Authentic and spicy!"</p>
-                            <div className="mt-4 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-white/20"></div>
-                                <span className="text-xs font-bold tracking-widest uppercase">Sarah M.</span>
-                            </div>
-                        </div>
                     </div>
                 </section>
 
@@ -104,22 +71,22 @@ export default function Welcome({ auth, products, categories }) {
                                 <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 group-hover:bg-yellow-500 group-hover:text-black transition-colors duration-300">
                                     <ShieldCheck className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">100% Halal Verified</h3>
-                                <p className="text-gray-400 leading-relaxed">Ensure peace of mind with our certified Halal ingredients and processing.</p>
+                                <h3 className="text-xl font-bold mb-3">Tersertifikasi 100% Halal</h3>
+                                <p className="text-gray-400 leading-relaxed">Nikmati tanpa ragu dengan bahan dan proses pengolahan yang telah diverifikasi halal.</p>
                             </div>
                             <div className="group">
                                 <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 group-hover:bg-yellow-500 group-hover:text-black transition-colors duration-300">
                                     <Star className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">Premium Quality</h3>
-                                <p className="text-gray-400 leading-relaxed">Hand-picked cassavas and genuine spices for the ultimate taste.</p>
+                                <h3 className="text-xl font-bold mb-3">Kualitas Premium</h3>
+                                <p className="text-gray-400 leading-relaxed">Singkong pilihan dan rempah-rempah asli untuk menghasilkan cita rasa terbaik.</p>
                             </div>
                             <div className="group">
                                 <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 group-hover:bg-yellow-500 group-hover:text-black transition-colors duration-300">
                                     <Truck className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">Fast Delivery</h3>
-                                <p className="text-gray-400 leading-relaxed">Shipping across Indonesia with secure and safe packaging.</p>
+                                <h3 className="text-xl font-bold mb-3">Pengiriman Cepat</h3>
+                                <p className="text-gray-400 leading-relaxed">Melayani pengiriman ke seluruh Indonesia dengan pengemasan yang aman dan terpercaya.</p>
                             </div>
                         </div>
                     </div>
@@ -130,18 +97,19 @@ export default function Welcome({ auth, products, categories }) {
                     <div className="container mx-auto px-6">
                         <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-8">
                             <div className="max-w-xl">
-                                <span className="text-yellow-600 font-bold tracking-widest uppercase text-sm mb-2 block">Our Selection</span>
+                                <span className="text-yellow-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pilih Rasa Favoritmu</span>
                                 <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-                                    Curated Delicacies
+                                    Menu Terlaris
                                 </h2>
                             </div>
-                            <a href="#" className="hidden md:inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 hover:border-yellow-600 transition-colors">
-                                View Full Menu <ArrowRight className="w-4 h-4" />
-                            </a>
+                            <Link href="/search" className="hidden md:inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 hover:border-yellow-600 transition-colors">
+                                Lihat Semua Menu <ArrowRight className="w-4 h-4" />
+                            </Link>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-8">
-                            {products.map((product) => (
+                            {/* PERUBAHAN DI SINI: Menambahkan .slice(0, 8) */}
+                            {products.slice(0, 8).map((product) => (
                                 <Link
                                     key={product.id}
                                     href={route('products.show', product.id)}
@@ -156,7 +124,7 @@ export default function Welcome({ auth, products, categories }) {
                                                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                             />
                                         ) : (
-                                            <div className="flex h-full items-center justify-center text-gray-400">No Image</div>
+                                            <div className="flex h-full items-center justify-center text-gray-400">Tidak Ada Gambar</div>
                                         )}
                                         {/* Floating Tag */}
                                         <div className="absolute top-4 left-4">
@@ -180,9 +148,9 @@ export default function Welcome({ auth, products, categories }) {
                         </div>
 
                         <div className="mt-12 text-center md:hidden">
-                            <a href="#" className="inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1">
-                                View Full Menu <ArrowRight className="w-4 h-4" />
-                            </a>
+                            <Link href="/search" className="inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 transition-colors">
+                                Lihat Semua Menu <ArrowRight className="w-4 h-4" />
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -194,27 +162,33 @@ export default function Welcome({ auth, products, categories }) {
                             <div className="max-w-sm">
                                 <h2 className="text-3xl font-black tracking-tighter mb-6">SANJAI SAIYO.</h2>
                                 <p className="text-gray-400 leading-relaxed">
-                                    Bringing the authentic taste of Padang to the world. Experience the tradition, feel the spice.
+                                    Membawa cita rasa autentik Minang ke panggung dunia. Rasakan tradisinya, nikmati kelezatan rempahnya.
                                 </p>
                             </div>
                             <div className="flex gap-16 text-sm text-gray-400">
                                 <div className="flex flex-col gap-4">
-                                    <strong className="text-white uppercase tracking-wider">Shop</strong>
-                                    <a href="#" className="hover:text-white transition-colors">Best Sellers</a>
-                                    <a href="#" className="hover:text-white transition-colors">New Arrivals</a>
-                                    <a href="#" className="hover:text-white transition-colors">Gift Packs</a>
+                                    <strong className="text-white uppercase tracking-wider">Belanja</strong>
+                                    {categories.slice(0, 5).map((category) => (
+                                        <Link 
+                                            key={category.id}
+                                            href={`/search?query=${encodeURIComponent(category.nama_kategori)}`} 
+                                            className="hover:text-white transition-colors"
+                                        >
+                                            {category.nama_kategori}
+                                        </Link>
+                                    ))}
                                 </div>
                                 <div className="flex flex-col gap-4">
-                                    <strong className="text-white uppercase tracking-wider">Company</strong>
-                                    <a href="#" className="hover:text-white transition-colors">About Us</a>
-                                    <a href="#" className="hover:text-white transition-colors">Contact</a>
-                                    <a href="#" className="hover:text-white transition-colors">Terms</a>
+                                    <strong className="text-white uppercase tracking-wider">Perusahaan</strong>
+                                    <a href="#" className="hover:text-white transition-colors">Tentang Kami</a>
+                                    <a href="#" className="hover:text-white transition-colors">Kontak</a>
+                                    <a href="#" className="hover:text-white transition-colors">Syarat & Ketentuan</a>
                                 </div>
                             </div>
                         </div>
                         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-                            <p>&copy; {new Date().getFullYear()} Sanjai Saiyo. All rights reserved.</p>
-                            <p>Designed with passion.</p>
+                            <p>&copy; {new Date().getFullYear()} Sanjai Saiyo. Hak cipta dilindungi.</p>
+                            <p>Diciptakan dengan dedikasi dan kebanggaan.</p>
                         </div>
                     </div>
                 </footer>

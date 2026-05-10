@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
-import { Check, Truck, CreditCard, ChevronDown } from 'lucide-react';
+import { Check, CreditCard, ChevronDown, MapPin } from 'lucide-react';
 import axios from 'axios';
 
-export default function CheckoutIndex({ cartItems, provinces }) {
+export default function CheckoutIndex({ cartItems, provinces, userAddresses = [] }) {
     // Calculate totals
     const itemsTotal = cartItems.reduce((sum, item) => {
         const price = item.product.harga + (item.variant ? item.variant.additional_price : 0);
         return sum + (price * item.quantity);
     }, 0);
+
+    const primaryAddress = userAddresses.find(a => a.is_primary) || userAddresses[0];
 
     const [cities, setCities] = useState([]);
     const [districts, setDistricts] = useState([]);
@@ -17,17 +19,24 @@ export default function CheckoutIndex({ cartItems, provinces }) {
     const [shippingOptions, setShippingOptions] = useState([]);
     const [selectedShipping, setSelectedShipping] = useState(null);
 
+    // Objek Logo Kurir memanggil langsung dari folder public/img/
+    const courierLogos = {
+        jne: '/img/jne.png',
+        tiki: '/img/tiki.png',
+        pos: '/img/pos.png'
+    };
+
     const { data, setData, post, processing, errors } = useForm({
-        recipient_name: '',
-        phone_number: '',
-        full_address: '',
-        province_id: '',
+        recipient_name: primaryAddress?.recipient_name || '',
+        phone_number: primaryAddress?.phone_number || '',
+        full_address: primaryAddress?.full_address || '',
+        province_id: primaryAddress?.province_id || '',
         province_name: '',
-        city_id: '',
+        city_id: primaryAddress?.city_id || '',
         city_name: '',
-        district_id: '',
+        district_id: primaryAddress?.district_id || '',
         district_name: '',
-        subdistrict_id: '',
+        subdistrict_id: primaryAddress?.subdistrict_id || '',
         subdistrict_name: '',
         courier: '',
         shipping_service: '',
@@ -97,16 +106,8 @@ export default function CheckoutIndex({ cartItems, provinces }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Set province name based on ID
         const selectedProv = provinces.find(p => p.id == data.province_id);
         const selectedCity = cities.find(c => c.id == data.city_id);
-
-        // Ensure we send correct names. Inertia's data might lag if we rely solely on state updates triggered just now.
-        // However, setData updates are typically fast. 
-        // Better: We can pass these directly if we want, or rely on what we set in onChange.
-        // Let's rely on what we set in onChange + safety check here if needed? 
-        // Actually, with react state, sticking to "data" is fine, but we need to ensure "province_name" was set.
-        // Our onChange handlers set them.
 
         post(route('checkout.store'));
     };
@@ -126,149 +127,76 @@ export default function CheckoutIndex({ cartItems, provinces }) {
                     <div className="lg:col-span-8 space-y-8">
                         {/* Address Section */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm">1</div>
-                                Alamat Pengiriman
-                            </h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nama Penerima</label>
-                                    <input
-                                        type="text"
-                                        value={data.recipient_name}
-                                        onChange={e => setData('recipient_name', e.target.value)}
-                                        className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black"
-                                        placeholder="Contoh: Budi Santoso"
-                                    />
-                                    {errors.recipient_name && <p className="text-red-500 text-xs mt-1">{errors.recipient_name}</p>}
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                                    <input
-                                        type="text"
-                                        value={data.phone_number}
-                                        onChange={e => setData('phone_number', e.target.value)}
-                                        className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black"
-                                        placeholder="08123456789"
-                                    />
-                                    {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
-                                </div>
-                                <div className="col-span-1 md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap</label>
-                                    <textarea
-                                        rows="3"
-                                        value={data.full_address}
-                                        onChange={e => setData('full_address', e.target.value)}
-                                        className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black"
-                                        placeholder="Nama Jalan, No. Rumah, RT/RW, Kecamatan..."
-                                    ></textarea>
-                                    {errors.full_address && <p className="text-red-500 text-xs mt-1">{errors.full_address}</p>}
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
-                                    <div className="relative">
-                                        <select
-                                            value={data.province_id}
-                                            onChange={e => {
-                                                const prov = provinces.find(p => p.id == e.target.value);
-                                                setData(d => ({
-                                                    ...d,
-                                                    province_id: e.target.value,
-                                                    province_name: prov?.name || '',
-                                                    city_id: '', city_name: '',
-                                                    district_id: '', district_name: '',
-                                                    subdistrict_id: '', subdistrict_name: ''
-                                                }));
-                                            }}
-                                            className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black appearance-none"
-                                        >
-                                            <option value="">Pilih Provinsi</option>
-                                            {provinces.map((p, idx) => (
-                                                <option key={p.id || idx} value={p.id}>{p.name}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                    {errors.province_id && <p className="text-red-500 text-xs mt-1">{errors.province_id}</p>}
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Kota/Kabupaten</label>
-                                    <div className="relative">
-                                        <select
-                                            value={data.city_id}
-                                            onChange={e => {
-                                                const city = cities.find(c => c.id == e.target.value);
-                                                setData(d => ({
-                                                    ...d,
-                                                    city_id: e.target.value,
-                                                    city_name: city ? `${city.type || ''} ${city.name}`.trim() : '',
-                                                    district_id: '', district_name: '',
-                                                    subdistrict_id: '', subdistrict_name: ''
-                                                }));
-                                            }}
-                                            disabled={!data.province_id}
-                                            className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black appearance-none disabled:bg-gray-100 disabled:text-gray-400"
-                                        >
-                                            <option value="">Pilih Kota/Kabupaten</option>
-                                            {cities.map((c, idx) => (
-                                                <option key={c.id || idx} value={c.id}>{c.type} {c.name}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                    {errors.city_id && <p className="text-red-500 text-xs mt-1">{errors.city_id}</p>}
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Kecamatan</label>
-                                    <div className="relative">
-                                        <select
-                                            value={data.district_id || ''}
-                                            onChange={e => {
-                                                const dist = districts.find(d => d.id == e.target.value);
-                                                setData(d => ({
-                                                    ...d,
-                                                    district_id: e.target.value,
-                                                    district_name: dist?.name || '',
-                                                    subdistrict_id: '', subdistrict_name: ''
-                                                }));
-                                            }}
-                                            disabled={!data.city_id}
-                                            className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black appearance-none disabled:bg-gray-100 disabled:text-gray-400"
-                                        >
-                                            <option value="">Pilih Kecamatan</option>
-                                            {districts.map((d, idx) => (
-                                                <option key={d.id || idx} value={d.id}>{d.name}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Kelurahan</label>
-                                    <div className="relative">
-                                        <select
-                                            value={data.subdistrict_id || ''}
-                                            onChange={e => {
-                                                const sub = subdistricts.find(s => s.id == e.target.value);
-                                                setData(d => ({
-                                                    ...d,
-                                                    subdistrict_id: e.target.value,
-                                                    subdistrict_name: sub?.name || ''
-                                                }));
-                                            }}
-                                            disabled={!data.district_id}
-                                            className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black appearance-none disabled:bg-gray-100 disabled:text-gray-400"
-                                        >
-                                            <option value="">Pilih Kelurahan</option>
-                                            {subdistricts.map((s, idx) => (
-                                                <option key={s.id || idx} value={s.id}>{s.name}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                </div>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-bold flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm">1</div>
+                                    Alamat Pengiriman
+                                </h2>
+                                {userAddresses.length > 0 && (
+                                    <a href={route('profile.edit')} className="text-sm font-semibold text-black border border-black px-4 py-1.5 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">
+                                        + Tambah Alamat
+                                    </a>
+                                )}
                             </div>
+
+                            {userAddresses.length > 0 && (
+                                <div className="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                    <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                        <MapPin className="w-4 h-4" /> Pilih Alamat Tersimpan
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            className="w-full rounded-xl border-gray-300 focus:ring-black focus:border-black appearance-none bg-white"
+                                            onChange={(e) => {
+                                                const addr = userAddresses.find(a => a.id == e.target.value);
+                                                if (addr) {
+                                                    setData({
+                                                        ...data,
+                                                        recipient_name: addr.recipient_name || '',
+                                                        phone_number: addr.phone_number || '',
+                                                        full_address: addr.full_address || '',
+                                                        province_id: addr.province_id || '',
+                                                        city_id: addr.city_id || '',
+                                                        district_id: addr.district_id || '',
+                                                        subdistrict_id: addr.subdistrict_id || '',
+                                                    });
+                                                }
+                                            }}
+                                            defaultValue={primaryAddress?.id || ''}
+                                        >
+                                            <option value="" disabled>Pilih Alamat...</option>
+                                            {userAddresses.map(addr => (
+                                                <option key={addr.id} value={addr.id}>
+                                                    {addr.label ? `[${addr.label}] ` : ''}{addr.recipient_name} - {addr.full_address.substring(0, 30)}...
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {userAddresses.length === 0 ? (
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+                                    <MapPin className="w-10 h-10 text-yellow-500 mx-auto mb-3" />
+                                    <h3 className="font-bold text-lg text-yellow-900 mb-2">Belum Ada Alamat</h3>
+                                    <p className="text-yellow-700 text-sm mb-4">Anda harus menambahkan alamat pengiriman terlebih dahulu di profil Anda sebelum dapat melanjutkan ke pembayaran.</p>
+                                    <a href={route('profile.edit')} className="inline-block bg-black text-white px-6 py-2 rounded-full font-bold hover:bg-gray-800 transition-colors">
+                                        Pergi ke Profil
+                                    </a>
+                                </div>
+                            ) : data.recipient_name ? (
+                                <div className="mt-6 bg-gray-50 p-5 rounded-xl border border-gray-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="font-bold text-lg">{data.recipient_name}</span>
+                                        <span className="text-gray-500 text-sm">({data.phone_number})</span>
+                                    </div>
+                                    <p className="text-gray-700">{data.full_address}</p>
+                                    <p className="text-gray-500 text-sm mt-1">
+                                        Pastikan alamat di atas sudah benar untuk menghindari kesalahan pengiriman.
+                                    </p>
+                                </div>
+                            ) : null}
                         </div>
 
                         {/* Courier Section */}
@@ -282,10 +210,18 @@ export default function CheckoutIndex({ cartItems, provinces }) {
                                     <div
                                         key={c}
                                         onClick={() => setData('courier', c)}
-                                        className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${data.courier === c ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                        // Ubah style di sini: menggunakan border-2 border-black saat aktif, border-gray-200 saat tidak
+                                        className={`cursor-pointer rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${data.courier === c ? 'border-2 border-black bg-white' : 'border border-gray-200 hover:border-gray-300 bg-white'}`}
                                     >
-                                        <Truck className="w-6 h-6" />
-                                        <span className="uppercase font-bold">{c}</span>
+                                        <div className="h-12 w-full flex items-center justify-center">
+                                            {/* Ubah style di sini: hapus efek grayscale */}
+                                            <img 
+                                                src={courierLogos[c]} 
+                                                alt={c.toUpperCase()} 
+                                                className="max-h-full max-w-[100px] object-contain"
+                                            />
+                                        </div>
+                                        <span className={`uppercase font-bold text-sm tracking-wider ${data.courier === c ? 'text-black' : 'text-gray-500'}`}>{c}</span>
                                     </div>
                                 ))}
                             </div>
@@ -328,7 +264,7 @@ export default function CheckoutIndex({ cartItems, provinces }) {
                                     <span>Rp {itemsTotal.toLocaleString('id-ID')}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600 font-medium">
-                                    <span>Ongkos Kirim ({data.courier?.toUpperCase()})</span>
+                                    <span>Ongkos Kirim ({data.courier?.toUpperCase() || '-'})</span>
                                     <span>Rp {data.shipping_cost.toLocaleString('id-ID')}</span>
                                 </div>
                                 <div className="h-px bg-gray-100 my-2"></div>

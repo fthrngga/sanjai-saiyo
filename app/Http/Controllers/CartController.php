@@ -25,21 +25,31 @@ class CartController extends Controller
             'product_variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
-        $cartItem = \App\Models\Cart::where('user_id', auth()->id())
-            ->where('product_id', $request->product_id)
-            ->where('product_variant_id', $request->product_variant_id)
-            ->first();
+        $isBuyNow = $request->boolean('is_buy_now');
 
-        if ($cartItem) {
-            $cartItem->quantity += $request->quantity;
-            $cartItem->save();
+        // If it's a Buy Now action, deselect all existing cart items first
+        if ($isBuyNow) {
+            \App\Models\Cart::where('user_id', auth()->id())->update(['is_selected' => false]);
+        }
+
+        $cartItem = \App\Models\Cart::firstOrNew([
+            'user_id' => auth()->id(),
+            'product_id' => $request->product_id,
+            'product_variant_id' => $request->product_variant_id,
+        ]);
+
+        if ($isBuyNow) {
+            // For Buy Now, override quantity and forcefully select it
+            $cartItem->quantity = $request->quantity;
+            $cartItem->is_selected = true;
         } else {
-            \App\Models\Cart::create([
-                'user_id' => auth()->id(),
-                'product_id' => $request->product_id,
-                'product_variant_id' => $request->product_variant_id,
-                'quantity' => $request->quantity,
-            ]);
+            $cartItem->quantity = ($cartItem->quantity ?? 0) + $request->quantity;
+        }
+
+        $cartItem->save();
+
+        if ($isBuyNow) {
+            return redirect()->route('checkout.index');
         }
 
         return redirect()->back()->with('success', 'Produk ditambahkan ke keranjang.');

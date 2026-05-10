@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/Admin/AdminLayout';
 import { Package, Search, Filter, Eye, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
@@ -12,17 +12,28 @@ import {
     TableRow,
 } from "@/Components/ui/table";
 
-export default function OrderIndex({ auth, orders, filters }) {
+export default function OrderIndex({ auth, orders, filters, newOrderIds = [] }) {
     const { data, setData, get, processing } = useForm({
         status: filters.status || 'all',
     });
 
-    const handleFilterChange = (e) => {
-        setData('status', e.target.value);
-        get(route('admin.orders.index'), {
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ['orders', 'newOrderIds'],
+                preserveScroll: true,
+                preserveState: true,
+            });
+        }, 10000); // Polling every 10 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleFilterChange = (newStatus) => {
+        setData('status', newStatus);
+        router.get(route('admin.orders.index'), { status: newStatus }, {
             preserveState: true,
             replace: true,
-            data: { status: e.target.value }
         });
     };
 
@@ -46,22 +57,28 @@ export default function OrderIndex({ auth, orders, filters }) {
                         <p className="text-sm text-gray-500">Pantau dan kelola semua pesanan masuk.</p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-gray-500" />
-                        <select
-                            value={filters.status}
-                            onChange={handleFilterChange}
-                            className="h-9 w-[200px] border-gray-200 rounded-md text-sm shadow-sm focus:border-gray-900 focus:ring-gray-900"
-                        >
-                            <option value="all">Semua Status</option>
-                            <option value="pending">Menunggu Pembayaran</option>
-                            <option value="processing">Diproses</option>
-                            <option value="shipped">Dikirim</option>
-                            <option value="completed">Selesai</option>
-                            <option value="cancelled">Dibatalkan</option>
-                        </select>
+                        <div className="flex bg-gray-100 p-1 rounded-lg mt-4 md:mt-0 overflow-x-auto max-w-full no-scrollbar">
+                            {[
+                                { id: 'all', label: 'Semua Pesanan' },
+                                { id: 'pending', label: 'Menunggu' },
+                                { id: 'processing', label: 'Diproses' },
+                                { id: 'shipped', label: 'Dikirim' },
+                                { id: 'completed', label: 'Selesai' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => handleFilterChange(tab.id)}
+                                    className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all ${
+                                        filters.status === tab.id
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-900'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
 
                 <div className="p-6">
                     <Table>
@@ -77,9 +94,16 @@ export default function OrderIndex({ auth, orders, filters }) {
                         </TableHeader>
                         <TableBody>
                             {orders.data.length > 0 ? (
-                                orders.data.map((order) => (
-                                    <TableRow key={order.id}>
-                                        <TableCell className="font-bold">#{order.id}</TableCell>
+                                orders.data.map((order) => {
+                                    const isNew = newOrderIds.includes(order.id);
+                                    return (
+                                    <TableRow key={order.id} className={isNew ? 'bg-yellow-50/50 hover:bg-yellow-50 transition-colors' : ''}>
+                                        <TableCell className="font-bold relative">
+                                            {isNew && (
+                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" title="Pesanan Baru!"></span>
+                                            )}
+                                            <span className={isNew ? 'pl-2' : ''}>#{order.id}</span>
+                                        </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <span className="font-medium text-gray-900">{order.user.name}</span>
@@ -113,7 +137,8 @@ export default function OrderIndex({ auth, orders, filters }) {
                                             </Button>
                                         </TableCell>
                                     </TableRow>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8 text-gray-500">

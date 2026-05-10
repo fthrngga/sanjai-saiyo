@@ -67,7 +67,7 @@ export default function SearchInput({ className = "" }) {
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setIsOpen(true)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch(query)}
-                    className="w-full pl-5 pr-12 py-3 bg-gray-50 border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-gray-100 rounded-full transition-all duration-300 shadow-sm text-sm font-medium"
+                    className="w-full pl-5 pr-12 py-3 bg-gray-50 border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-gray-100 rounded-full transition-all duration-300 shadow-sm text-sm font-medium text-gray-900"
                 />
                 <button
                     onClick={() => handleSearch(query)}

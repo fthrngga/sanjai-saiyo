@@ -16,7 +16,12 @@ class Order extends Model
         'payment_status',
         'snap_token',
         'order_status',
-        'tracking_number'
+        'tracking_number',
+        'cancel_reason',
+        'kode_unik',
+        'grand_total',
+        'status_pembayaran',
+        'bukti_pembayaran'
     ];
 
     protected $casts = [
@@ -31,5 +36,10 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

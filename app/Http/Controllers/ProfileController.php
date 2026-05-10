@@ -16,11 +16,18 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): Response
+    public function edit(Request $request, \App\Services\RajaOngkirService $rajaOngkir): Response
     {
+        $user = $request->user();
+        $user->load('addresses');
+
+        $provinces = $rajaOngkir->getProvinces();
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'addresses' => $user->addresses,
+            'provinces' => $provinces,
         ]);
     }
 

@@ -8,9 +8,15 @@ export default function ProductCard({ product }) {
             className="group relative block bg-white"
         >
             <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                {product.gambar ? (
+                {(product.gambar && product.gambar !== 'null') ? (
                     <img
                         src={`/storage/${product.gambar}`}
+                        alt={product.nama_produk}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                ) : (product.variants && product.variants.length > 0 && product.variants[0].image_path) ? (
+                    <img
+                        src={`/storage/${product.variants[0].image_path}`}
                         alt={product.nama_produk}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />

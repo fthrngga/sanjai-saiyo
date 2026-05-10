@@ -2,8 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\User;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Review;
 
 class ProductSeeder extends Seeder
 {
@@ -12,70 +18,194 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = ['Keripik', 'Snack', 'Kue'];
+        // Data Produk Riil Sanjai Saiyo Payakumbuh
+        // Asumsi: Harga dasar adalah untuk kemasan standar (misal 250 gram)
+        $data = [
+            'Keripik Sanjai' => [
+                [
+                    'nama' => 'Sanjai Balado Merah',
+                    'deskripsi' => 'Keripik singkong renyah dengan balutan bumbu karamel cabai merah asli yang pedas, manis, dan lengket merata. (Kemasan 250 Gram)',
+                    'gambar' => 'products/sanjai-balado-merah.png',
+                    'harga' => 25000,
+                    'variants' => [
+                        ['name' => 'Pedas Standar', 'additional_price' => 0],
+                        ['name' => 'Ekstra Pedas', 'additional_price' => 2000],
+                    ]
+                ],
+                [
+                    'nama' => 'Sanjai Balado Hijau',
+                    'deskripsi' => 'Inovasi rasa dengan bumbu cabai hijau pilihan. Memberikan aroma segar khas cabai hijau. (Kemasan 250 Gram)',
+                    'gambar' => 'products/sanjai-balado-hijau.png',
+                    'harga' => 27000,
+                    'variants' => [
+                        ['name' => 'Pedas Standar', 'additional_price' => 0],
+                        ['name' => 'Ekstra Pedas', 'additional_price' => 2000],
+                    ]
+                ],
+                [
+                    'nama' => 'Sanjai Tawar (Putih)',
+                    'deskripsi' => 'Keripik singkong original yang diiris tipis, digoreng garing. Sangat renyah dan cocok untuk camilan santai. (Kemasan 250 Gram)',
+                    'gambar' => 'products/sanjai-tawar.png',
+                    'harga' => 20000,
+                    'variants' => [
+                        ['name' => 'Original', 'additional_price' => 0],
+                        ['name' => 'Asin Gurih (Bawang)', 'additional_price' => 1000],
+                    ]
+                ],
+                [
+                    'nama' => 'Karak Kaliang',
+                    'deskripsi' => 'Camilan tradisional berbahan dasar singkong berbentuk angka delapan. Gurih khas bawang putih dan sangat renyah. (Kemasan 250 Gram)',
+                    'gambar' => 'products/karak-kaliang.png',
+                    'harga' => 15000,
+                    'variants' => [
+                        ['name' => 'Original', 'additional_price' => 0],
+                    ]
+                ],
+                [
+                    'nama' => 'Dakak-dakak',
+                    'deskripsi' => 'Singkong potong dadu kecil yang digoreng kering dengan bumbu kuning. Aroma daun kunyitnya sangat wangi. (Kemasan 250 Gram)',
+                    'gambar' => 'products/dakak-dakak.png',
+                    'harga' => 18000,
+                    'variants' => [
+                        ['name' => 'Original', 'additional_price' => 0],
+                        ['name' => 'Pedas', 'additional_price' => 2000],
+                    ]
+                ],
+            ],
+            
+            'Kudapan Manis Tradisional' => [
+                [
+                    'nama' => 'Galamai Payakumbuh',
+                    'deskripsi' => 'Dodol khas Payakumbuh berbahan dasar tepung ketan, santan, dan gula aren. Teksturnya kenyal dan legit. (Kemasan 500 Gram)',
+                    'gambar' => 'products/galamai.png',
+                    'harga' => 35000,
+                    'variants' => [
+                        ['name' => 'Original (Polos)', 'additional_price' => 0],
+                        ['name' => 'Tabur Kacang', 'additional_price' => 3000],
+                    ]
+                ],
+                [
+                    'nama' => 'Kipang Kacang',
+                    'deskripsi' => 'Kacang tanah sangrai utuh yang disatukan dengan karamel gula aren yang manis dan kental. (Kemasan 250 Gram)',
+                    'gambar' => 'products/kipang-kacang.png',
+                    'harga' => 20000,
+                    'variants' => [
+                        ['name' => 'Original', 'additional_price' => 0],
+                    ]
+                ],
+                [
+                    'nama' => 'Batiah',
+                    'deskripsi' => 'Kerupuk ketan manis khas Payakumbuh disiram cairan gula merah. (Isi 10 Pcs)',
+                    'gambar' => 'products/batiah.png',
+                    'harga' => 15000,
+                    'variants' => [
+                        ['name' => 'Original', 'additional_price' => 0],
+                    ]
+                ],
+            ],
 
-        foreach ($categories as $catName) {
-            $cat = \App\Models\Category::create(['nama_kategori' => $catName]);
+            'Kue & Bakery' => [
+                [
+                    'nama' => 'Kue Sapik',
+                    'deskripsi' => 'Kue kering tradisional Minang yang dilipat saat panas. Renyah dan harum. (Kemasan Toples Sedang)',
+                    'gambar' => 'products/kue-sapik.png',
+                    'harga' => 25000,
+                    'variants' => [
+                        ['name' => 'Original (Kayu Manis)', 'additional_price' => 0],
+                        ['name' => 'Pandan', 'additional_price' => 2000],
+                    ]
+                ],
+            ],
 
-            for ($i = 1; $i <= 3; $i++) {
-                $product = \App\Models\Product::create([
+            'Kerupuk & Rakik' => [
+                [
+                    'nama' => 'Rakik Maco',
+                    'deskripsi' => 'Gorengan renyah berbahan dasar adonan tepung beras dan telur, diberi topping ikan maco. (Isi 10 Pcs)',
+                    'gambar' => 'products/rakik-maco.png',
+                    'harga' => 15000,
+                    'variants' => [
+                        ['name' => 'Ikan Maco', 'additional_price' => 0],
+                        ['name' => 'Udang Rebon', 'additional_price' => 2000],
+                    ]
+                ],
+                [
+                    'nama' => 'Karupuak Jangek (Rambak Kulit)',
+                    'deskripsi' => 'Kerupuk kulit sapi asli yang digoreng mekar sempurna. (Kemasan 200 Gram)',
+                    'gambar' => 'products/karupuak-jangek.png',
+                    'harga' => 25000,
+                    'variants' => [
+                        ['name' => 'Original Gurih', 'additional_price' => 0],
+                        ['name' => 'Bumbu Pedas Daun Jeruk', 'additional_price' => 3000],
+                    ]
+                ],
+            ],
+        ];
+
+        foreach ($data as $categoryName => $products) {
+            $cat = Category::firstOrCreate(['nama_kategori' => $categoryName]);
+
+            foreach ($products as $p) {
+                $product = Product::create([
                     'category_id' => $cat->id,
-                    'nama_produk' => $catName . ' ' . $i,
-                    'deskripsi' => 'Deskripsi lezat untuk ' . $catName . ' ' . $i,
-                    'harga' => rand(10000, 50000),
-                    'stok' => rand(10, 100),
-                    'gambar' => 'products/' . $catName . '.jpg',
+                    'nama_produk' => $p['nama'],
+                    'deskripsi' => $p['deskripsi'],
+                    'harga' => $p['harga'],
+                    'stok' => rand(30, 100),
+                    'gambar' => $p['gambar'],
                 ]);
 
-                // Create Variants
-                $variants = ['Original', 'Pedas', 'Keju', 'Balado'];
-                foreach ($variants as $index => $vName) {
-                    \App\Models\ProductVariant::create([
+                foreach ($p['variants'] as $variantData) {
+                    ProductVariant::create([
                         'product_id' => $product->id,
-                        'name' => $vName,
-                        'additional_price' => ($index * 1000),
-                        'stock' => rand(5, 50),
+                        'name' => $variantData['name'],
+                        'additional_price' => $variantData['additional_price'],
+                        'stock' => rand(15, 50),
                     ]);
                 }
 
-                // Create Mock Reviews
-                $user = \App\Models\User::inRandomOrder()->first();
+                $user = User::inRandomOrder()->first();
                 if ($user) {
-                    for ($r = 0; $r < rand(1, 5); $r++) {
-                        // Need an order for the review technically, but for seeding we can just create a review
-                        // If schema enforces order_id, we need a dummy order. 
-                        // Let's create a dummy completed order for this review.
+                    $order = Order::create([
+                        'user_id' => $user->id,
+                        'address_snapshot' => json_encode(['address' => 'Jl. Sudirman, Pekanbaru']),
+                        'total_price' => $product->harga,
+                        'shipping_cost' => 15000,
+                        'shipping_courier' => 'jnt',
+                        'shipping_service' => 'EZ',
+                        'payment_status' => 'paid',
+                        'order_status' => 'completed'
+                    ]);
 
-                        $order = \App\Models\Order::create([
-                            'user_id' => $user->id,
-                            'address_snapshot' => [],
-                            'total_price' => $product->harga,
-                            'shipping_cost' => 10000,
-                            'shipping_courier' => 'jne',
-                            'shipping_service' => 'REG',
-                            'payment_status' => 'paid',
-                            'order_status' => 'completed'
-                        ]);
+                    // Randomize which variant gets ordered for the mock review
+                    $randomVariant = $product->variants()->inRandomOrder()->first();
+                    $priceAtPurchase = $product->harga + ($randomVariant ? $randomVariant->additional_price : 0);
+                    $variantName = $randomVariant ? ' - ' . $randomVariant->name : '';
 
-                        \App\Models\OrderItem::create([
-                            'order_id' => $order->id,
-                            'product_id' => $product->id,
-                            'product_name_snapshot' => $product->nama_produk,
-                            'price_at_purchase' => $product->harga,
-                            'quantity' => rand(1, 3)
-                        ]);
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'product_name_snapshot' => $product->nama_produk . $variantName,
+                        'price_at_purchase' => $priceAtPurchase,
+                        'quantity' => rand(1, 3)
+                    ]);
 
-                        \App\Models\Review::create([
-                            'user_id' => $user->id,
-                            'product_id' => $product->id,
-                            'order_id' => $order->id,
-                            'rating' => rand(4, 5),
-                            'comment' => 'Enak banget! Rasanya otentik.',
-                        ]);
-                    }
+                    $comments = [
+                        'Packing rapi, bumbunya melimpah dan tidak pelit. Mantap!',
+                        'Rasanya autentik banget, persis kayak yang sering dibeli langsung ke tokonya.',
+                        'Pengiriman cepat, keripiknya nggak hancur di jalan. Rekomen banget buat oleh-oleh.',
+                        'Enak, garing, rasanya pas nggak bikin eneg. Repeat order pastinya.',
+                        'Produk fresh baru digoreng sepertinya. Top markotop!'
+                    ];
+
+                    Review::create([
+                        'user_id' => $user->id,
+                        'product_id' => $product->id,
+                        'order_id' => $order->id,
+                        'rating' => rand(4, 5),
+                        'comment' => $comments[array_rand($comments)],
+                    ]);
                 }
             }
         }
     }
 }
-
