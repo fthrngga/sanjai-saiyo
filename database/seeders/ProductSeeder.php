@@ -145,6 +145,12 @@ class ProductSeeder extends Seeder
             $cat = Category::firstOrCreate(['nama_kategori' => $categoryName]);
 
             foreach ($products as $p) {
+                // Check if the product already exists to prevent duplication
+                $product = Product::where('nama_produk', $p['nama'])->first();
+                if ($product) {
+                    continue;
+                }
+
                 $product = Product::create([
                     'category_id' => $cat->id,
                     'nama_produk' => $p['nama'],

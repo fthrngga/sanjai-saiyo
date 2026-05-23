@@ -34,7 +34,7 @@ Buka layanan utama aplikasi web Anda di Railway, pilih tab **Variables**, lalu k
 APP_NAME="Sanjai Saiyo"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://domain-railway-anda.up.railway.app # (Ganti dengan domain dari Railway nanti)
+APP_URL=sanjai-saiyo-production.up.railway.app # (Ganti dengan domain dari Railway nanti)
 
 # APP_KEY wajib diisi dengan string 32-karakter yang aman.
 # Anda bisa mendapatkannya dari berkas .env lokal Anda, atau buat baru lewat terminal lokal dengan perintah:
