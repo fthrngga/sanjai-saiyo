@@ -59,15 +59,21 @@ SESSION_LIFETIME=120
 
 *Tip: Menggunakan format `${{MySQL.MYSQLHOST}}` memudahkan karena Railway akan otomatis menghubungkan kredensial MySQL secara dinamis tanpa perlu menuliskan password manual secara statis.*
 
-### Langkah 4: Konfigurasi Release Command (Validasi Database Otomatis)
+### Langkah 4: Konfigurasi Release Command (Validasi Database & Seeder Otomatis)
 Agar database dimigrasikan secara otomatis pada setiap proses deployment baru:
 1. Buka layanan utama aplikasi web Anda di Railway.
 2. Masuk ke menu **Settings**.
 3. Gulir ke bawah hingga bagian **Deploy**.
-4. Cari kolom **Release Command**, lalu isi dengan perintah berikut:
-   ```bash
-   php artisan migrate --force
-   ```
+4. Cari kolom **Release Command**, lalu isi dengan salah satu perintah berikut sesuai kebutuhan Anda:
+   * **Opsi A: Hanya Migrasi (Sangat Direkomendasikan untuk produksi)**:
+     ```bash
+     php artisan migrate --force
+     ```
+   * **Opsi B: Migrasi + Seeder Otomatis (Gunakan jika seeder aman dijalankan berulang kali)**:
+     ```bash
+     php artisan migrate --seed --force
+     ```
+     *(Catatan: Pastikan kode Seeder Anda bersifat aman/tidak menduplikasi data jika dijalankan berkali-kali pada setiap deploy).*
 5. Klik **Save**.
 *Catatan: Railway akan menjalankan perintah ini di kontainer sementara sebelum aplikasi Anda aktif. Jika migrasi gagal, deployment lama tetap berjalan aman (Zero Downtime Deployment).*
 
