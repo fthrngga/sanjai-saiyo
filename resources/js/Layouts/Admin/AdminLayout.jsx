@@ -2,11 +2,14 @@ import AdminSidebar from './AdminSidebar';
 import { Head, usePage, router } from '@inertiajs/react';
 import { User, CheckCircle, X, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Modal from '@/Components/Modal';
+import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm';
 
 export default function AdminLayout({ children, title }) {
     const { auth, flash, notifications = [], unread_notifications_count = 0 } = usePage().props;
     const [showSuccess, setShowSuccess] = useState(false);
     const [showNotif, setShowNotif] = useState(false);
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
     const markAsRead = () => {
         router.post(route('notifications.markRead'), {}, { preserveScroll: true });
@@ -32,10 +35,14 @@ export default function AdminLayout({ children, title }) {
                     <h1 className="text-xl font-bold text-gray-800">{title}</h1>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-gray-900">{auth.user.name}</span>
-                            <span className="text-xs text-gray-500 capitalize">{auth.user.role}</span>
-                        </div>
+                        <button 
+                            onClick={() => setShowChangePasswordModal(true)}
+                            className="flex flex-col items-end text-left focus:outline-none group"
+                            title="Ubah Password Admin"
+                        >
+                            <span className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">{auth.user.name}</span>
+                            <span className="text-xs text-gray-500 capitalize group-hover:text-amber-500 transition-colors">{auth.user.role}</span>
+                        </button>
                         <div className="relative">
                             <button 
                                 onClick={() => setShowNotif(!showNotif)}
@@ -83,9 +90,13 @@ export default function AdminLayout({ children, title }) {
                             )}
                         </div>
 
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                            <User className="text-gray-600" size={20} />
-                        </div>
+                        <button 
+                            onClick={() => setShowChangePasswordModal(true)}
+                            className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-amber-100 hover:text-amber-600 transition focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            title="Ubah Password Admin"
+                        >
+                            <User size={20} />
+                        </button>
                     </div>
                 </header>
 
@@ -108,6 +119,24 @@ export default function AdminLayout({ children, title }) {
                     </button>
                 </div>
             </div>
+
+            {/* Change Password Modal */}
+            <Modal show={showChangePasswordModal} onClose={() => setShowChangePasswordModal(false)} maxWidth="md">
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-bold text-gray-900">Ubah Password Admin</h2>
+                        <button 
+                            onClick={() => setShowChangePasswordModal(false)}
+                            className="text-gray-400 hover:text-gray-600 p-1"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <UpdatePasswordForm 
+                        onSuccess={() => setShowChangePasswordModal(false)} 
+                    />
+                </div>
+            </Modal>
         </div>
     );
 }

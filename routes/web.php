@@ -45,6 +45,27 @@ Route::get('/search', function () {
     ]);
 })->name('search.index');
 
+Route::get('/catalog', function () {
+    $query    = request('query', '');
+    $category = request('category', '');
+    $sort     = request('sort', 'latest');
+
+    $products = \App\Models\Product::with('category')
+        ->when($query, fn($q) => $q->where('nama_produk', 'like', "%{$query}%"))
+        ->when($category, fn($q) => $q->whereHas('category', fn($c) => $c->where('slug', $category)->orWhere('id', $category)))
+        ->when($sort === 'price_asc',  fn($q) => $q->orderBy('harga', 'asc'))
+        ->when($sort === 'price_desc', fn($q) => $q->orderBy('harga', 'desc'))
+        ->when($sort === 'latest' || !$sort, fn($q) => $q->latest())
+        ->paginate(12)
+        ->withQueryString();
+
+    return Inertia::render('Catalog', [
+        'products'   => $products,
+        'categories' => \App\Models\Category::all(),
+        'filters'    => ['query' => $query, 'category' => $category, 'sort' => $sort],
+    ]);
+})->name('catalog.index');
+
 Route::get('/products/{product}', function (Product $product) {
     return Inertia::render('Product/Detail', [
         'product' => $product->load(['category', 'variants', 'images', 'reviews.user']),

@@ -15,33 +15,8 @@ export default function FloatingNavbar() {
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 50);
-            
-            // Scroll spy logic for catalog
-            if (typeof window !== 'undefined' && window.location.pathname === '/') {
-                const catalogEl = document.getElementById('catalog');
-                if (catalogEl) {
-                    const rect = catalogEl.getBoundingClientRect();
-                    // Treat it as "in view" if top is near viewport upper third
-                    if (rect.top <= 250) {
-                        setCurrentHash((prev) => prev !== '#catalog' ? '#catalog' : prev);
-                    } else {
-                        setCurrentHash((prev) => prev !== '' ? '' : prev);
-                    }
-                }
-            }
         };
         window.addEventListener('scroll', handleScroll);
-        
-        if (typeof window !== 'undefined') {
-            setCurrentHash(window.location.hash);
-            const handleHashChange = () => setCurrentHash(window.location.hash);
-            window.addEventListener('hashchange', handleHashChange);
-            
-            return () => {
-                window.removeEventListener('scroll', handleScroll);
-                window.removeEventListener('hashchange', handleHashChange);
-            }
-        }
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
@@ -108,7 +83,7 @@ export default function FloatingNavbar() {
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm mx-2">
                         <Link href="/" className={navLinkClass('/')}>Beranda</Link>
-                        <Link href="/#catalog" className={navLinkClass('/#catalog')}>Katalog</Link>
+                        <Link href={route('catalog.index')} className={navLinkClass('/catalog')}>Katalog</Link>
                         <Link href="/about" className={navLinkClass('/about')}>Tentang</Link>
                         <Link href="/contact" className={navLinkClass('/contact')}>Kontak</Link>
                     </div>
@@ -241,7 +216,7 @@ export default function FloatingNavbar() {
 
                     <div className="flex flex-col items-center gap-8 w-full overflow-y-auto pb-20">
                         <Link href="/" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/')}>Beranda</Link>
-                        <Link href="/#catalog" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/#catalog')}>Katalog</Link>
+                        <Link href={route('catalog.index')} onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/catalog')}>Katalog</Link>
                         <Link href="/about" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/about')}>Tentang</Link>
                         <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/contact')}>Kontak</Link>
 
