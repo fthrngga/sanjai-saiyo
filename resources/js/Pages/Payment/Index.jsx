@@ -9,6 +9,13 @@ export default function PaymentIndex({ order, dynamic_qris }) {
         bukti_pembayaran: null,
     });
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText('1110023567452');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -46,9 +53,9 @@ export default function PaymentIndex({ order, dynamic_qris }) {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Kolom Kiri: Detail dan QRIS */}
-                        <div>
-                            <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                        {/* Kolom Kiri: Detail dan QRIS / Bank Transfer */}
+                        <div className="space-y-6">
+                            <div className="bg-gray-50 rounded-xl p-6">
                                 <div className="text-center mb-4">
                                     <span className="text-gray-600 block mb-1">Total Pembayaran</span>
                                     <span className="font-bold text-4xl text-blue-600">
@@ -73,13 +80,48 @@ export default function PaymentIndex({ order, dynamic_qris }) {
                             </div>
 
                             {!isPaid && !isPendingVerification && (
-                                <div className="bg-white border-2 border-dashed border-gray-200 rounded-xl p-6 text-center flex flex-col items-center">
-                                    <h3 className="font-bold text-lg mb-4">Scan QRIS</h3>
-                                    <div className="bg-white p-4 rounded-xl border shadow-sm inline-block">
-                                        <QRCodeSVG value={dynamic_qris} size={200} level="M" />
+                                <>
+                                    <div className="bg-white border-2 border-dashed border-gray-200 rounded-xl p-6 text-center flex flex-col items-center">
+                                        <h3 className="font-bold text-lg mb-4">Scan QRIS</h3>
+                                        <div className="bg-white p-4 rounded-xl border shadow-sm inline-block">
+                                            <QRCodeSVG value={dynamic_qris} size={200} level="M" />
+                                        </div>
+                                        <p className="text-sm text-gray-500 mt-4">Nominal pembayaran sudah terisi otomatis pada aplikasi e-wallet / m-banking Anda.</p>
                                     </div>
-                                    <p className="text-sm text-gray-500 mt-4">Nominal pembayaran sudah terisi otomatis pada aplikasi e-wallet / m-banking Anda.</p>
-                                </div>
+
+                                    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                        <h3 className="font-bold text-lg mb-4 text-gray-900 flex items-center gap-2">
+                                            <CreditCard className="w-5 h-5 text-blue-600" />
+                                            Transfer Bank (Alternatif)
+                                        </h3>
+                                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Bank</span>
+                                                <span className="font-bold text-gray-900">Bank Mandiri</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm items-center">
+                                                <span className="text-gray-500">Nomor Rekening</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-mono font-bold text-gray-900">1110023567452</span>
+                                                    <button 
+                                                        onClick={handleCopy}
+                                                        className="text-xs text-blue-600 hover:text-blue-800 font-semibold focus:outline-none bg-blue-50 hover:bg-blue-100 transition px-2 py-1 rounded"
+                                                        type="button"
+                                                    >
+                                                        {copied ? 'Tersalin!' : 'Salin'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Nama Penerima</span>
+                                                <span className="font-bold text-gray-900">SITI KHOLIJAH</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-3 leading-relaxed">
+                                            Jika Anda kesulitan menggunakan QRIS, Anda dapat mentransfer langsung ke rekening Bank Mandiri di atas, lalu unggah bukti transfernya.
+                                        </p>
+                                    </div>
+                                </>
                             )}
                         </div>
 

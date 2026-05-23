@@ -102,14 +102,14 @@ export default function Welcome({ auth, products, categories }) {
                                     Menu Terlaris
                                 </h2>
                             </div>
-                            <Link href="/search" className="hidden md:inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 hover:border-yellow-600 transition-colors">
-                                Lihat Semua Menu <ArrowRight className="w-4 h-4" />
+                            <Link href={route('catalog.index')} className="hidden md:inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 hover:border-yellow-600 transition-colors">
+                            Lihat Semua Menu <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-8">
-                            {/* PERUBAHAN DI SINI: Menambahkan .slice(0, 8) */}
-                            {products.slice(0, 8).map((product) => (
+                            {/* Tampil 4 produk terlaris di beranda, lengkapnya di /catalog */}
+                            {products.slice(0, 4).map((product) => (
                                 <Link
                                     key={product.id}
                                     href={route('products.show', product.id)}
@@ -148,7 +148,7 @@ export default function Welcome({ auth, products, categories }) {
                         </div>
 
                         <div className="mt-12 text-center md:hidden">
-                            <Link href="/search" className="inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 transition-colors">
+                            <Link href={route('catalog.index')} className="inline-flex items-center gap-2 font-bold border-b-2 border-black pb-1 hover:text-yellow-600 transition-colors">
                                 Lihat Semua Menu <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
@@ -169,9 +169,9 @@ export default function Welcome({ auth, products, categories }) {
                                 <div className="flex flex-col gap-4">
                                     <strong className="text-white uppercase tracking-wider">Belanja</strong>
                                     {categories.slice(0, 5).map((category) => (
-                                        <Link 
+                                        <Link
                                             key={category.id}
-                                            href={`/search?query=${encodeURIComponent(category.nama_kategori)}`} 
+                                            href={`/search?query=${encodeURIComponent(category.nama_kategori)}`}
                                             className="hover:text-white transition-colors"
                                         >
                                             {category.nama_kategori}

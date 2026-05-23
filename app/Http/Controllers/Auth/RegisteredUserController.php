@@ -34,7 +34,12 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'no_telepon' => 'required|string|max:20',
+            'no_telepon' => 'required|string|regex:/^[0-9]{10,15}$/',
+        ], [
+            'no_telepon.regex' => 'Nomor telepon harus berupa angka dengan panjang antara 10 hingga 15 digit.',
+            'no_telepon.required' => 'Nomor telepon wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar.',
         ]);
 
         $user = User::create([

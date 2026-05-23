@@ -58,7 +58,14 @@ export default function Register() {
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-amber-500 transition-all bg-gray-50 focus:bg-white text-gray-900"
                         autoComplete="tel"
                         placeholder="Contoh: 081234567890"
-                        onChange={(e) => setData('no_telepon', e.target.value)}
+                        onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setData('no_telepon', val);
+                        }}
+                        minLength={10}
+                        maxLength={15}
+                        pattern="[0-9]{10,15}"
+                        title="Nomor telepon harus berupa angka dengan panjang antara 10 hingga 15 digit"
                         required
                     />
                     <InputError message={errors.no_telepon} className="mt-2" />
@@ -75,6 +82,7 @@ export default function Register() {
                         autoComplete="username"
                         placeholder="contoh@email.com"
                         onChange={(e) => setData('email', e.target.value)}
+                        maxLength={255}
                         required
                     />
                     <InputError message={errors.email} className="mt-2" />
