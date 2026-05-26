@@ -13,31 +13,39 @@ class UserRoleSeeder extends Seeder
 
     public function run(): void
     {
-        $adminUser = User::create([
-            'name' => 'Admin Sanjai Saiyo',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('11223344'), 
-            'role' => 'admin',
-        ]);
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin Sanjai Saiyo',
+                'password' => Hash::make('11223344'), 
+                'role' => 'admin',
+            ]
+        );
 
-        Admin::create([
-            'user_id' => $adminUser->id,
-            'phone' => '081234567890',
-            'department' => 'IT & Operations',
-        ]);
+        Admin::updateOrCreate(
+            ['user_id' => $adminUser->id],
+            [
+                'phone' => '081234567890',
+                'department' => 'IT & Operations',
+            ]
+        );
 
 
-        $pelangganUser = User::create([
-            'name' => 'Budi Pelanggan',
-            'email' => 'pelanggan@gmail.com',
-            'password' => Hash::make('11223344'),
-            'role' => 'pelanggan',
-        ]);
+        $pelangganUser = User::updateOrCreate(
+            ['email' => 'pelanggan@gmail.com'],
+            [
+                'name' => 'Budi Pelanggan',
+                'password' => Hash::make('11223344'),
+                'role' => 'pelanggan',
+            ]
+        );
 
-        Pelanggan::create([
-            'user_id' => $pelangganUser->id,
-            'no_telepon' => '087654321098',
-        ]);
+        Pelanggan::updateOrCreate(
+            ['user_id' => $pelangganUser->id],
+            [
+                'no_telepon' => '087654321098',
+            ]
+        );
 
     }
 }
