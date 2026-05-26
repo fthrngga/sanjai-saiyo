@@ -10,9 +10,14 @@ nixPkgs = ["...", "nodejs"]
 cmds = [
     "composer install --no-interaction --prefer-dist --optimize-autoloader",
     "npm ci",
-    "npm run build"
+    "npm run build",
+    "php artisan storage:link || true"
 ]
 
 # Menentukan Nginx document root untuk Laravel (yaitu folder public)
 [variables]
     NIXPACKS_PHP_ROOT_DIR = "/app/public"
+
+# Start command eksplisit agar Railway tahu ini long-running service (bukan one-shot)
+[start]
+cmd = "php-fpm -D && nginx -g 'daemon off;'"
