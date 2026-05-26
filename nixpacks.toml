@@ -15,6 +15,8 @@ cmds = [
 ]
 
 # Menentukan Nginx document root untuk Laravel (yaitu folder public)
+# NIXPACKS_PHP_PORT harus di-set saat BUILD agar port ini di-bake ke nginx.conf
 [variables]
     NIXPACKS_PHP_ROOT_DIR = "/app/public"
+    NIXPACKS_PHP_PORT = "8080"
 
