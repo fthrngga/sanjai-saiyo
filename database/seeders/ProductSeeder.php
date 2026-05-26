@@ -25,7 +25,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Sanjai Balado Merah',
                     'deskripsi' => 'Keripik singkong renyah dengan balutan bumbu karamel cabai merah asli yang pedas, manis, dan lengket merata. (Kemasan 250 Gram)',
-                    'gambar' => 'products/sanjai-balado-merah.png',
+                    'gambar' => 'products/Keripik.jpg',
                     'harga' => 25000,
                     'variants' => [
                         ['name' => 'Pedas Standar', 'additional_price' => 0],
@@ -35,7 +35,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Sanjai Balado Hijau',
                     'deskripsi' => 'Inovasi rasa dengan bumbu cabai hijau pilihan. Memberikan aroma segar khas cabai hijau. (Kemasan 250 Gram)',
-                    'gambar' => 'products/sanjai-balado-hijau.png',
+                    'gambar' => 'products/Keripik.jpg',
                     'harga' => 27000,
                     'variants' => [
                         ['name' => 'Pedas Standar', 'additional_price' => 0],
@@ -45,7 +45,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Sanjai Tawar (Putih)',
                     'deskripsi' => 'Keripik singkong original yang diiris tipis, digoreng garing. Sangat renyah dan cocok untuk camilan santai. (Kemasan 250 Gram)',
-                    'gambar' => 'products/sanjai-tawar.png',
+                    'gambar' => 'products/Keripik.jpg',
                     'harga' => 20000,
                     'variants' => [
                         ['name' => 'Original', 'additional_price' => 0],
@@ -55,7 +55,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Karak Kaliang',
                     'deskripsi' => 'Camilan tradisional berbahan dasar singkong berbentuk angka delapan. Gurih khas bawang putih dan sangat renyah. (Kemasan 250 Gram)',
-                    'gambar' => 'products/karak-kaliang.png',
+                    'gambar' => 'products/Keripik.jpg',
                     'harga' => 15000,
                     'variants' => [
                         ['name' => 'Original', 'additional_price' => 0],
@@ -64,7 +64,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Dakak-dakak',
                     'deskripsi' => 'Singkong potong dadu kecil yang digoreng kering dengan bumbu kuning. Aroma daun kunyitnya sangat wangi. (Kemasan 250 Gram)',
-                    'gambar' => 'products/dakak-dakak.png',
+                    'gambar' => 'products/Keripik.jpg',
                     'harga' => 18000,
                     'variants' => [
                         ['name' => 'Original', 'additional_price' => 0],
@@ -77,7 +77,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Galamai Payakumbuh',
                     'deskripsi' => 'Dodol khas Payakumbuh berbahan dasar tepung ketan, santan, dan gula aren. Teksturnya kenyal dan legit. (Kemasan 500 Gram)',
-                    'gambar' => 'products/galamai.png',
+                    'gambar' => 'products/Kue.jpg',
                     'harga' => 35000,
                     'variants' => [
                         ['name' => 'Original (Polos)', 'additional_price' => 0],
@@ -86,8 +86,8 @@ class ProductSeeder extends Seeder
                 ],
                 [
                     'nama' => 'Kipang Kacang',
-                    'deskripsi' => 'Kacang tanah sangrai utuh yang disatukan dengan karamel gula aren yang manis dan kental. (Kemasan 250 Gram)',
-                    'gambar' => 'products/kipang-kacang.png',
+                    'deskripsi' => 'Kacang tanah sangrai utuh yang disatukan dengan karamel gula aren yang manis and kental. (Kemasan 250 Gram)',
+                    'gambar' => 'products/Kue.jpg',
                     'harga' => 20000,
                     'variants' => [
                         ['name' => 'Original', 'additional_price' => 0],
@@ -96,7 +96,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Batiah',
                     'deskripsi' => 'Kerupuk ketan manis khas Payakumbuh disiram cairan gula merah. (Isi 10 Pcs)',
-                    'gambar' => 'products/batiah.png',
+                    'gambar' => 'products/Kue.jpg',
                     'harga' => 15000,
                     'variants' => [
                         ['name' => 'Original', 'additional_price' => 0],
@@ -108,7 +108,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Kue Sapik',
                     'deskripsi' => 'Kue kering tradisional Minang yang dilipat saat panas. Renyah dan harum. (Kemasan Toples Sedang)',
-                    'gambar' => 'products/kue-sapik.png',
+                    'gambar' => 'products/Kue.jpg',
                     'harga' => 25000,
                     'variants' => [
                         ['name' => 'Original (Kayu Manis)', 'additional_price' => 0],
@@ -121,7 +121,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Rakik Maco',
                     'deskripsi' => 'Gorengan renyah berbahan dasar adonan tepung beras dan telur, diberi topping ikan maco. (Isi 10 Pcs)',
-                    'gambar' => 'products/rakik-maco.png',
+                    'gambar' => 'products/Snack.jpg',
                     'harga' => 15000,
                     'variants' => [
                         ['name' => 'Ikan Maco', 'additional_price' => 0],
@@ -131,7 +131,7 @@ class ProductSeeder extends Seeder
                 [
                     'nama' => 'Karupuak Jangek (Rambak Kulit)',
                     'deskripsi' => 'Kerupuk kulit sapi asli yang digoreng mekar sempurna. (Kemasan 200 Gram)',
-                    'gambar' => 'products/karupuak-jangek.png',
+                    'gambar' => 'products/Snack.jpg',
                     'harga' => 25000,
                     'variants' => [
                         ['name' => 'Original Gurih', 'additional_price' => 0],
@@ -148,6 +148,8 @@ class ProductSeeder extends Seeder
                 // Check if the product already exists to prevent duplication
                 $product = Product::where('nama_produk', $p['nama'])->first();
                 if ($product) {
+                    // Update image path to use the existing committed image files
+                    $product->update(['gambar' => $p['gambar']]);
                     continue;
                 }
 
