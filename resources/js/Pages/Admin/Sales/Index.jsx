@@ -1,5 +1,5 @@
-    import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React from 'react';
+import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/Admin/AdminLayout';
 import { TrendingUp, ShoppingBag, PieChart, Info, Package, Eye, CheckCircle } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
@@ -12,7 +12,35 @@ import {
     TableRow,
 } from "@/Components/ui/table";
 
-export default function SalesIndex({ auth, sales, metrics }) {
+export default function SalesIndex({ auth, sales, metrics, filters, availableYears }) {
+    const { month = '', year = '' } = filters || {};
+
+    const months = [
+        { value: '', label: 'Semua Bulan' },
+        { value: '1', label: 'Januari' },
+        { value: '2', label: 'Februari' },
+        { value: '3', label: 'Maret' },
+        { value: '4', label: 'April' },
+        { value: '5', label: 'Mei' },
+        { value: '6', label: 'Juni' },
+        { value: '7', label: 'Juli' },
+        { value: '8', label: 'Agustus' },
+        { value: '9', label: 'September' },
+        { value: '10', label: 'Oktober' },
+        { value: '11', label: 'November' },
+        { value: '12', label: 'Desember' },
+    ];
+
+    const handleFilterChange = (newMonth, newYear) => {
+        const params = {};
+        if (newMonth) params.month = newMonth;
+        if (newYear) params.year = newYear;
+
+        router.get(route('admin.sales.index'), params, {
+            preserveState: true,
+            replace: true,
+        });
+    };
 
     // Helper function to calculate total items in one order
     const calculateTotalItems = (items) => {
@@ -32,7 +60,7 @@ export default function SalesIndex({ auth, sales, metrics }) {
                     <div>
                         <p className="text-sm font-medium text-gray-500 mb-1">Total Pendapatan</p>
                         <h3 className="text-2xl font-bold text-gray-900">
-                            Rp {metrics.total_revenue.toLocaleString('id-ID')}
+                            Rp {Number(metrics.total_revenue).toLocaleString('id-ID')}
                         </h3>
                     </div>
                 </div>
@@ -66,9 +94,42 @@ export default function SalesIndex({ auth, sales, metrics }) {
 
             {/* Sales Table */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-                <div className="p-6 border-b border-gray-100 flex flex-col justify-between items-start gap-2">
-                    <h2 className="text-lg font-semibold text-gray-800">Riwayat Penjualan</h2>
-                    <p className="text-sm text-gray-500">Daftar transaksi pesanan yang telah diselesaikan oleh pelanggan (Status: Completed).</p>
+                <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-800">Riwayat Penjualan</h2>
+                        <p className="text-sm text-gray-500">Daftar transaksi pesanan yang telah diselesaikan oleh pelanggan (Status: Completed).</p>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <select
+                            value={month || ''}
+                            onChange={(e) => handleFilterChange(e.target.value, year)}
+                            className="bg-white border border-gray-200 rounded-lg text-sm pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
+                        >
+                            {months.map((m) => (
+                                <option key={m.value} value={m.value}>{m.label}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={year || ''}
+                            onChange={(e) => handleFilterChange(month, e.target.value)}
+                            className="bg-white border border-gray-200 rounded-lg text-sm pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
+                        >
+                            <option value="">Semua Tahun</option>
+                            {availableYears.map((y) => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                        {(month || year) && (
+                            <button
+                                onClick={() => handleFilterChange('', '')}
+                                className="text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1 flex items-center transition-colors"
+                            >
+                                Reset Filter
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="p-6">
@@ -103,7 +164,7 @@ export default function SalesIndex({ auth, sales, metrics }) {
                                             </span>
                                         </TableCell>
                                         <TableCell className="font-medium text-green-700">
-                                            Rp {sale.total_price.toLocaleString('id-ID')}
+                                            Rp {Number(sale.total_price).toLocaleString('id-ID')}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="outline" size="sm" asChild className="h-8 gap-1">

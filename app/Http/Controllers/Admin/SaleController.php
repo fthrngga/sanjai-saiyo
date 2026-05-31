@@ -12,18 +12,57 @@ class SaleController extends Controller
 {
     public function index(Request $request)
     {
-        // Gather analytics metrics for only 'completed' orders
-        $totalRevenue = Order::where('order_status', 'completed')->sum('total_price');
-        $totalOrders = Order::where('order_status', 'completed')->count();
-        $totalItemsSold = OrderItem::whereHas('order', function($query) {
-            $query->where('order_status', 'completed');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Base query for completed orders with filters
+        $baseQuery = Order::where('order_status', 'completed')
+            ->when($month, function ($q) use ($month) {
+                return $q->whereMonth('updated_at', $month);
+            })
+            ->when($year, function ($q) use ($year) {
+                return $q->whereYear('updated_at', $year);
+            });
+
+        $totalRevenue = $baseQuery->sum('total_price');
+        $totalOrders = $baseQuery->count();
+
+        // Calculate total items sold with filters
+        $totalItemsSold = OrderItem::whereHas('order', function ($query) use ($month, $year) {
+            $query->where('order_status', 'completed')
+                ->when($month, function ($q) use ($month) {
+                    return $q->whereMonth('updated_at', $month);
+                })
+                ->when($year, function ($q) use ($year) {
+                    return $q->whereYear('updated_at', $year);
+                });
         })->sum('quantity');
 
-        // Fetch completed orders with pagination
+        // Fetch completed orders with pagination and filters
         $sales = Order::with(['user', 'items.product'])
             ->where('order_status', 'completed')
+            ->when($month, function ($q) use ($month) {
+                return $q->whereMonth('updated_at', $month);
+            })
+            ->when($year, function ($q) use ($year) {
+                return $q->whereYear('updated_at', $year);
+            })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
+
+        // Get distinct years from orders for dropdown filter
+        $availableYears = Order::where('order_status', 'completed')
+            ->selectRaw('YEAR(updated_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->toArray();
+
+        // Fallback if no sales exist
+        if (empty($availableYears)) {
+            $availableYears = [(int) date('Y')];
+        }
 
         return Inertia::render('Admin/Sales/Index', [
             'sales' => $sales,
@@ -31,7 +70,12 @@ class SaleController extends Controller
                 'total_revenue' => $totalRevenue,
                 'total_orders' => $totalOrders,
                 'total_items_sold' => $totalItemsSold
-            ]
+            ],
+            'filters' => [
+                'month' => $month,
+                'year' => $year,
+            ],
+            'availableYears' => $availableYears
         ]);
     }
 }

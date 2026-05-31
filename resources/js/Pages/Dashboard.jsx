@@ -144,7 +144,10 @@ export default function Dashboard({ auth, metrics = {}, recent_orders = [], top_
             {/* Metrics Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Revenue Card */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+                <Link
+                    href={route('admin.sales.index')}
+                    className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 cursor-pointer transition-all relative overflow-hidden group block"
+                >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-50 to-amber-100 rounded-bl-full -z-10 transition-transform duration-500 group-hover:scale-125"></div>
                     <div className="flex justify-between items-start mb-4">
                         <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 shadow-sm border border-amber-100">
@@ -161,10 +164,13 @@ export default function Dashboard({ auth, metrics = {}, recent_orders = [], top_
                         </h3>
                         <p className="text-xs text-amber-600 mt-2 font-bold bg-amber-50 inline-block px-2 py-1 rounded-md">Berdasarkan filter aktif</p>
                     </div>
-                </div>
+                </Link>
 
                 {/* Processing Orders Card */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+                <Link
+                    href={route('admin.orders.index', { status: 'processing' })}
+                    className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 cursor-pointer transition-all relative overflow-hidden group block"
+                >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-50 to-blue-100 rounded-bl-full -z-10 transition-transform duration-500 group-hover:scale-125"></div>
                     <div className="flex justify-between items-start mb-4">
                         <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
@@ -178,10 +184,13 @@ export default function Dashboard({ auth, metrics = {}, recent_orders = [], top_
                         </h3>
                         <p className="text-xs text-blue-600 mt-2 font-bold bg-blue-50 inline-block px-2 py-1 rounded-md">Bungkus & proses pesanan</p>
                     </div>
-                </div>
+                </Link>
 
                 {/* Pending Actions Card */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+                <Link
+                    href={route('admin.orders.index', { status: 'pending' })}
+                    className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-orange-200 cursor-pointer transition-all relative overflow-hidden group block"
+                >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-50 to-orange-100 rounded-bl-full -z-10 transition-transform duration-500 group-hover:scale-125"></div>
                     <div className="flex justify-between items-start mb-4">
                         <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-sm border border-orange-100">
@@ -195,7 +204,7 @@ export default function Dashboard({ auth, metrics = {}, recent_orders = [], top_
                         </h3>
                         <p className="text-xs text-orange-600 mt-2 font-bold bg-orange-50 inline-block px-2 py-1 rounded-md">Belum dibayar oleh pembeli</p>
                     </div>
-                </div>
+                </Link>
 
                 {/* User Base Card */}
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">

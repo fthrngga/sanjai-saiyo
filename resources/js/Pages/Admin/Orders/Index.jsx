@@ -63,7 +63,8 @@ export default function OrderIndex({ auth, orders, filters, newOrderIds = [] }) 
                                 { id: 'pending', label: 'Menunggu' },
                                 { id: 'processing', label: 'Diproses' },
                                 { id: 'shipped', label: 'Dikirim' },
-                                { id: 'completed', label: 'Selesai' }
+                                { id: 'completed', label: 'Selesai' },
+                                { id: 'cancelled', label: 'Dibatalkan' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -111,7 +112,7 @@ export default function OrderIndex({ auth, orders, filters, newOrderIds = [] }) 
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            Rp {order.total_price.toLocaleString('id-ID')}
+                                            Rp {Number(order.total_price).toLocaleString('id-ID')}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col gap-1 items-start">
