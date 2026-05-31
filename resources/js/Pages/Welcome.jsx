@@ -180,9 +180,8 @@ export default function Welcome({ auth, products, categories }) {
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     <strong className="text-white uppercase tracking-wider">Perusahaan</strong>
-                                    <a href="#" className="hover:text-white transition-colors">Tentang Kami</a>
-                                    <a href="#" className="hover:text-white transition-colors">Kontak</a>
-                                    <a href="#" className="hover:text-white transition-colors">Syarat & Ketentuan</a>
+                                    <Link href="/about" className="hover:text-white transition-colors">Tentang Kami</Link>
+                                    <Link href="/contact" className="hover:text-white transition-colors">Kontak</Link>
                                 </div>
                             </div>
                         </div>

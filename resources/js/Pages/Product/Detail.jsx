@@ -197,9 +197,6 @@ export default function Detail({ product, related_products }) {
                         <div className="prose prose-sm text-gray-600 border-t border-gray-100 pt-6">
                             <h3 className="text-gray-900 font-semibold mb-2">Deskripsi</h3>
                             <p className="whitespace-pre-line">{product.deskripsi}</p>
-                            <p className="mt-4 text-xs text-gray-400">
-                                *Berat bersih 250gr per kemasan. Tahan hingga 1 bulan dalam wadah tertutup.
-                            </p>
                         </div>
                     </div>
 
