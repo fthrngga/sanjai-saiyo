@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -6,6 +8,8 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -91,33 +95,59 @@ export default function Register() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1.5" htmlFor="password">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            name="password"
-                            value={data.password}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-amber-500 transition-all bg-gray-50 focus:bg-white text-gray-900"
-                            autoComplete="new-password"
-                            placeholder="Minimal 8 karakter"
-                            onChange={(e) => setData('password', e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                value={data.password}
+                                className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-amber-500 transition-all bg-gray-50 focus:bg-white text-gray-900"
+                                autoComplete="new-password"
+                                placeholder="Minimal 8 karakter"
+                                onChange={(e) => setData('password', e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                ) : (
+                                    <Eye className="h-5 w-5" />
+                                )}
+                            </button>
+                        </div>
                         <InputError message={errors.password} className="mt-2" />
                     </div>
 
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1.5" htmlFor="password_confirmation">Konfirmasi</label>
-                        <input
-                            id="password_confirmation"
-                            type="password"
-                            name="password_confirmation"
-                            value={data.password_confirmation}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-amber-500 transition-all bg-gray-50 focus:bg-white text-gray-900"
-                            autoComplete="new-password"
-                            placeholder="Ulangi password"
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                id="password_confirmation"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                name="password_confirmation"
+                                value={data.password_confirmation}
+                                className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-amber-500 transition-all bg-gray-50 focus:bg-white text-gray-900"
+                                autoComplete="new-password"
+                                placeholder="Ulangi password"
+                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                            >
+                                {showConfirmPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                ) : (
+                                    <Eye className="h-5 w-5" />
+                                )}
+                            </button>
+                        </div>
                         <InputError message={errors.password_confirmation} className="mt-2" />
                     </div>
                 </div>

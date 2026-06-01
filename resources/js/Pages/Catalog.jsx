@@ -1,4 +1,5 @@
 import Navbar from '@/Components/Landing/Navbar';
+import Footer from '@/Components/Landing/Footer';
 import { Head, Link, router } from '@inertiajs/react';
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, X, ArrowUpDown } from 'lucide-react';
 import { useState, useCallback } from 'react';
@@ -158,11 +159,7 @@ export default function Catalog({ products, categories, filters }) {
                 )}
             </main>
 
-            <footer className="bg-white border-t border-gray-100 mt-16 py-8">
-                <div className="max-w-7xl mx-auto px-4 text-center text-gray-400 text-sm">
-                    © {new Date().getFullYear()} Sanjai Saiyo. Semua hak dilindungi.
-                </div>
-            </footer>
+            <Footer categories={categories} />
         </div>
     );
 }

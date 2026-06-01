@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
+import Footer from '@/Components/Landing/Footer';
 import { MapPin, Phone } from 'lucide-react';
 
 export default function Contact() {
@@ -72,12 +73,7 @@ export default function Contact() {
                 </div>
             </section>
 
-            {/* Embedded Minimal Footer */}
-            <footer className="bg-black text-white py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400 text-sm">
-                    <p>&copy; {new Date().getFullYear()} Sanjai Saiyo. Hak Cipta Dilindungi.</p>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

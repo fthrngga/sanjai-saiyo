@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
+import Footer from '@/Components/Landing/Footer';
 import { Minus, Plus, Heart, Share2, ShoppingCart, MessageSquare, Check, Truck } from 'lucide-react';
 
 export default function Detail({ product, related_products }) {
@@ -342,11 +343,7 @@ export default function Detail({ product, related_products }) {
                 )}
             </main>
 
-            <footer className="bg-white border-t border-gray-200 mt-20 py-10">
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p className="text-gray-400 text-sm">&copy; 2024 Sanjai Saiyo. Premium Authentic Padang Chips.</p>
-                </div>
-            </footer>
+            <Footer />
             
             {/* Login Modal */}
             {showLoginModal && (

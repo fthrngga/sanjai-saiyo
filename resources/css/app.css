@@ -66,3 +66,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide Microsoft Edge native password reveal button */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

@@ -1,10 +1,11 @@
 import Navbar from '@/Components/Landing/Navbar';
 import ProductCard from '@/Components/Landing/ProductCard';
+import Footer from '@/Components/Landing/Footer';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Search({ results, query }) {
     return (
-        <div className="bg-gray-50 min-h-screen font-sans text-gray-900 antialiased">
+        <div className="bg-gray-50 min-h-screen font-sans text-gray-900 antialiased flex flex-col justify-between">
             <Head title={`Pencarian: ${query}`} />
             <Navbar />
 
@@ -38,11 +39,7 @@ export default function Search({ results, query }) {
                 )}
             </main>
 
-            <footer className="bg-white border-t border-gray-200 mt-auto py-8">
-                <div className="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
-                    &copy; {new Date().getFullYear()} Sanjai Saiyo. All rights reserved.
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }
