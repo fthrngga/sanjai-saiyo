@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -56,16 +52,8 @@ export default function Login({ status, canResetPassword }) {
                 </div>
 
                 <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="mb-1.5">
                         <label className="block text-sm font-bold text-gray-700" htmlFor="password">Password</label>
-                        {canResetPassword && (
-                            <Link
-                                href={route('password.request')}
-                                className="text-sm font-bold text-amber-600 hover:text-amber-700 transition-colors"
-                            >
-                                Lupa Password?
-                            </Link>
-                        )}
                     </div>
                     <div className="relative">
                         <input
@@ -94,19 +82,6 @@ export default function Login({ status, canResetPassword }) {
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="flex items-center">
-                    <label className="flex items-center cursor-pointer group">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
-                            className="text-amber-600 focus:ring-amber-500 rounded border-gray-300 w-5 h-5 transition-colors cursor-pointer"
-                        />
-                        <span className="ms-3 text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
-                            Ingat saya
-                        </span>
-                    </label>
-                </div>
 
                 <div className="pt-2">
                     <button 
