@@ -53,6 +53,31 @@ class RegisteredUserController extends Controller
             'no_telepon' => $request->no_telepon,
         ]);
 
+        // Berikan Welcome Voucher (Potongan Ongkir Rp 15.000)
+        try {
+            $welcomeVoucher = \App\Models\Voucher::firstOrCreate(
+                ['code' => 'WELCOMESAIYO'],
+                [
+                    'name' => 'Voucher Selamat Datang',
+                    'type' => 'shipping',
+                    'discount_type' => 'fixed',
+                    'discount_value' => 15000,
+                    'min_spend' => 0,
+                    'quota' => -1,
+                    'is_active' => true,
+                ]
+            );
+
+            $user->claimedVouchers()->attach($welcomeVoucher->id, [
+                'claimed_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        } catch (\Exception $e) {
+            // Log error or ignore so registration doesn't fail if there's database issue
+            logger()->error('Failed to assign welcome voucher: ' . $e->getMessage());
+        }
+
         event(new Registered($user));
 
         Auth::login($user);

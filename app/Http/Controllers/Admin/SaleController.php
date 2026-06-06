@@ -24,7 +24,7 @@ class SaleController extends Controller
                 return $q->whereYear('updated_at', $year);
             });
 
-        $totalRevenue = $baseQuery->sum('total_price');
+        $totalRevenue = $baseQuery->sum(\Illuminate\Support\Facades\DB::raw('COALESCE(grand_total, total_price)'));
         $totalOrders = $baseQuery->count();
 
         // Calculate total items sold with filters

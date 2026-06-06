@@ -70,4 +70,16 @@ class User extends Authenticatable
     {
         return $this->role === $role;
     }
+
+    public function userVouchers()
+    {
+        return $this->hasMany(UserVoucher::class);
+    }
+
+    public function claimedVouchers()
+    {
+        return $this->belongsToMany(Voucher::class, 'user_vouchers')
+            ->withPivot(['id', 'claimed_at', 'used_at', 'order_id'])
+            ->withTimestamps();
+    }
 }

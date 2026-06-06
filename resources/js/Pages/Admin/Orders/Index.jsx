@@ -112,7 +112,7 @@ export default function OrderIndex({ auth, orders, filters, newOrderIds = [] }) 
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            Rp {Number(order.total_price).toLocaleString('id-ID')}
+                                            Rp {Number(order.grand_total || order.total_price).toLocaleString('id-ID')}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col gap-1 items-start">

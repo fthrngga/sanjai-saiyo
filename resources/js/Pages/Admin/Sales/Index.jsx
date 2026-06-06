@@ -164,7 +164,7 @@ export default function SalesIndex({ auth, sales, metrics, filters, availableYea
                                             </span>
                                         </TableCell>
                                         <TableCell className="font-medium text-green-700">
-                                            Rp {Number(sale.total_price).toLocaleString('id-ID')}
+                                            Rp {Number(sale.grand_total || sale.total_price).toLocaleString('id-ID')}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="outline" size="sm" asChild className="h-8 gap-1">

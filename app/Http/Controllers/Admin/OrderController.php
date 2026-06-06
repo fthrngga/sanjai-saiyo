@@ -40,7 +40,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         return Inertia::render('Admin/Orders/Show', [
-            'order' => $order->load(['user', 'items.product'])
+            'order' => $order->load(['user', 'items.product', 'voucher'])
         ]);
     }
 
@@ -87,6 +87,9 @@ class OrderController extends Controller
                         $variant = \App\Models\ProductVariant::find($item->product_variant_id);
                         if ($variant) {
                             $variant->decrement('stock', $item->quantity);
+                            if ($product) {
+                                $product->decrement('stok', $item->quantity);
+                            }
                             if ($variant->stock < 10) {
                                 $admin = \App\Models\User::where('role', 'admin')->first();
                                 if ($admin) {
@@ -129,6 +132,59 @@ class OrderController extends Controller
                 'payment_status' => 'paid',
                 'order_status' => 'processing',
             ]);
+
+            // Logika Reward Voucher Belanja (Semakin besar belanja, semakin tinggi potongan)
+            try {
+                $grandTotal = $order->grand_total;
+                $rewardPercent = 0;
+                $maxDiscount = 0;
+                $minSpend = 0;
+
+                if ($grandTotal >= 250000) {
+                    $rewardPercent = 15;
+                    $maxDiscount = 50000;
+                    $minSpend = 100000;
+                } elseif ($grandTotal >= 100000) {
+                    $rewardPercent = 10;
+                    $maxDiscount = 25000;
+                    $minSpend = 50000;
+                } elseif ($grandTotal >= 50000) {
+                    $rewardPercent = 5;
+                    $maxDiscount = 10000;
+                    $minSpend = 30000;
+                }
+
+                if ($rewardPercent > 0) {
+                    $voucherCode = "REWARD" . $rewardPercent . "-ORD-" . $order->id;
+
+                    // Cek jika voucher reward untuk order ini belum pernah dibuat
+                    if (!\App\Models\Voucher::where('code', $voucherCode)->exists()) {
+                        $voucher = \App\Models\Voucher::create([
+                            'code' => $voucherCode,
+                            'name' => "Reward Belanja " . $rewardPercent . "%",
+                            'type' => 'product',
+                            'discount_type' => 'percentage',
+                            'discount_value' => $rewardPercent,
+                            'max_discount' => $maxDiscount,
+                            'min_spend' => $minSpend,
+                            'quota' => 1,
+                            'start_date' => now(),
+                            'end_date' => now()->addDays(30), // Berlaku 30 hari
+                            'is_active' => true,
+                        ]);
+
+                        // Masukkan ke daftar voucher milik user
+                        $order->user->claimedVouchers()->attach($voucher->id, [
+                            'claimed_at' => now(),
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                logger()->error('Failed to generate reward voucher: ' . $e->getMessage());
+            }
+
             // send notification
             $order->user->notify(new \App\Notifications\OrderStatusChanged($order));
             return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi.');

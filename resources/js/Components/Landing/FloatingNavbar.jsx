@@ -84,6 +84,7 @@ export default function FloatingNavbar() {
                     <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm mx-2">
                         <Link href="/" className={navLinkClass('/')}>Beranda</Link>
                         <Link href={route('catalog.index')} className={navLinkClass('/catalog')}>Katalog</Link>
+                        <Link href={route('vouchers.index')} className={navLinkClass('/vouchers')}>Voucher</Link>
                         <Link href="/about" className={navLinkClass('/about')}>Tentang</Link>
                         <Link href="/contact" className={navLinkClass('/contact')}>Kontak</Link>
                     </div>
@@ -217,6 +218,7 @@ export default function FloatingNavbar() {
                     <div className="flex flex-col items-center gap-8 w-full overflow-y-auto pb-20">
                         <Link href="/" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/')}>Beranda</Link>
                         <Link href={route('catalog.index')} onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/catalog')}>Katalog</Link>
+                        <Link href={route('vouchers.index')} onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/vouchers')}>Voucher</Link>
                         <Link href="/about" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/about')}>Tentang</Link>
                         <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass('/contact')}>Kontak</Link>
 

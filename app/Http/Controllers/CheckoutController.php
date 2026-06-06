@@ -27,10 +27,23 @@ class CheckoutController extends Controller
         $provinces = $this->rajaOngkir->getProvinces();
         $userAddresses = auth()->user()->addresses;
 
+        $now = now();
+        $userVouchers = auth()->user()->claimedVouchers()
+            ->whereNull('user_vouchers.used_at')
+            ->where('vouchers.is_active', true)
+            ->where(function($q) use ($now) {
+                $q->whereNull('vouchers.start_date')->orWhere('vouchers.start_date', '<=', $now);
+            })
+            ->where(function($q) use ($now) {
+                $q->whereNull('vouchers.end_date')->orWhere('vouchers.end_date', '>=', $now);
+            })
+            ->get();
+
         return \Inertia\Inertia::render('Checkout/Index', [
             'cartItems' => $cartItems,
             'provinces' => $provinces,
-            'userAddresses' => $userAddresses
+            'userAddresses' => $userAddresses,
+            'userVouchers' => $userVouchers
         ]);
     }
 
@@ -87,6 +100,7 @@ class CheckoutController extends Controller
             'courier' => 'required|string',
             'shipping_service' => 'required|string',
             'shipping_cost' => 'required|integer',
+            'user_voucher_id' => 'nullable|integer',
         ]);
 
         $cartItems = \App\Models\Cart::with(['product', 'variant'])
@@ -98,6 +112,15 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index');
         }
 
+        // Validate stock before checkout
+        foreach ($cartItems as $item) {
+            $availableStock = $item->variant ? $item->variant->stock : $item->product->stok;
+            if ($item->quantity > $availableStock) {
+                $name = $item->product->nama_produk . ($item->variant ? " ({$item->variant->name})" : "");
+                return back()->withErrors(['stock' => "Stok untuk {$name} tidak mencukupi. Hanya tersedia {$availableStock} unit. Silakan sesuaikan keranjang Anda."]);
+            }
+        }
+
         $itemsTotal = 0;
         foreach ($cartItems as $item) {
             $price = $item->product->harga + ($item->variant ? $item->variant->additional_price : 0);
@@ -105,43 +128,106 @@ class CheckoutController extends Controller
         }
 
         $shippingCost = $request->shipping_cost;
-        $totalPrice = $itemsTotal + $shippingCost;
-        $kodeUnik = rand(100, 999);
-        $grandTotal = $totalPrice + $kodeUnik;
+        $discountAmount = 0;
+        $voucherId = null;
+        $userVoucher = null;
 
-        // Create Order
-        $order = \App\Models\Order::create([
-            'user_id' => auth()->id(),
-            'address_snapshot' => $request->only(['recipient_name', 'phone_number', 'full_address', 'province_name', 'city_name', 'province_id', 'city_id']),
-            'total_price' => $totalPrice,
-            'shipping_cost' => $shippingCost,
-            'shipping_courier' => $request->courier,
-            'shipping_service' => $request->shipping_service,
-            'payment_status' => 'pending', 
-            'order_status' => 'pending',
-            'kode_unik' => $kodeUnik,
-            'grand_total' => $grandTotal,
-            'status_pembayaran' => 'unpaid',
-            'snap_token' => null,
-        ]);
+        if ($request->user_voucher_id) {
+            $userVoucher = auth()->user()->userVouchers()
+                ->where('id', $request->user_voucher_id)
+                ->whereNull('used_at')
+                ->first();
 
-        foreach ($cartItems as $item) {
-            $price = $item->product->harga + ($item->variant ? $item->variant->additional_price : 0);
+            if ($userVoucher) {
+                $voucher = \App\Models\Voucher::find($userVoucher->voucher_id);
+                if ($voucher && $voucher->is_active) {
+                    $now = now();
+                    $isValidDate = (!$voucher->start_date || $voucher->start_date <= $now) && 
+                                   (!$voucher->end_date || $voucher->end_date >= $now);
 
-            \App\Models\OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'product_variant_id' => $item->product_variant_id,
-                'product_name_snapshot' => $item->product->nama_produk,
-                'variant_name_snapshot' => $item->variant ? $item->variant->name : null,
-                'price_at_purchase' => $price,
-                'quantity' => $item->quantity,
-            ]);
+                    if ($isValidDate && $itemsTotal >= $voucher->min_spend) {
+                        $voucherId = $voucher->id;
+
+                        if ($voucher->type === 'shipping') {
+                            if ($voucher->discount_type === 'fixed') {
+                                $discountAmount = min($shippingCost, $voucher->discount_value);
+                            } else {
+                                $pctDiscount = $shippingCost * ($voucher->discount_value / 100);
+                                if ($voucher->max_discount) {
+                                    $pctDiscount = min($pctDiscount, $voucher->max_discount);
+                                }
+                                $discountAmount = min($shippingCost, $pctDiscount);
+                            }
+                        } else {
+                            if ($voucher->discount_type === 'fixed') {
+                                $discountAmount = min($itemsTotal, $voucher->discount_value);
+                            } else {
+                                $pctDiscount = $itemsTotal * ($voucher->discount_value / 100);
+                                if ($voucher->max_discount) {
+                                    $pctDiscount = min($pctDiscount, $voucher->max_discount);
+                                }
+                                $discountAmount = min($itemsTotal, $pctDiscount);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!$voucherId) {
+                return back()->withErrors(['voucher' => 'Voucher tidak valid atau tidak memenuhi syarat minimum belanja.']);
+            }
         }
 
-        \App\Models\Cart::where('user_id', auth()->id())
-            ->where('is_selected', true)
-            ->delete();
+        $totalPrice = $itemsTotal + $shippingCost;
+        $kodeUnik = rand(100, 999);
+        $grandTotal = max(0, $itemsTotal + $shippingCost - $discountAmount) + $kodeUnik;
+
+        // Create Order and items inside transaction
+        $order = \DB::transaction(function () use ($request, $cartItems, $totalPrice, $shippingCost, $kodeUnik, $grandTotal, $voucherId, $discountAmount, $userVoucher) {
+            $order = \App\Models\Order::create([
+                'user_id' => auth()->id(),
+                'address_snapshot' => $request->only(['recipient_name', 'phone_number', 'full_address', 'province_name', 'city_name', 'province_id', 'city_id']),
+                'total_price' => $totalPrice,
+                'shipping_cost' => $shippingCost,
+                'shipping_courier' => $request->courier,
+                'shipping_service' => $request->shipping_service,
+                'payment_status' => 'pending', 
+                'order_status' => 'pending',
+                'kode_unik' => $kodeUnik,
+                'grand_total' => $grandTotal,
+                'status_pembayaran' => 'unpaid',
+                'snap_token' => null,
+                'voucher_id' => $voucherId,
+                'discount_amount' => $discountAmount,
+            ]);
+
+            foreach ($cartItems as $item) {
+                $price = $item->product->harga + ($item->variant ? $item->variant->additional_price : 0);
+
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'product_name_snapshot' => $item->product->nama_produk,
+                    'variant_name_snapshot' => $item->variant ? $item->variant->name : null,
+                    'price_at_purchase' => $price,
+                    'quantity' => $item->quantity,
+                ]);
+            }
+
+            if ($userVoucher) {
+                $userVoucher->update([
+                    'used_at' => now(),
+                    'order_id' => $order->id
+                ]);
+            }
+
+            \App\Models\Cart::where('user_id', auth()->id())
+                ->where('is_selected', true)
+                ->delete();
+
+            return $order;
+        });
 
         return redirect()->route('payment.show', $order->id)->with('success', 'Pesanan berhasil dibuat! Silakan lakukan pembayaran.');
     }

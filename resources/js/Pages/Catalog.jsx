@@ -66,40 +66,50 @@ export default function Catalog({ products, categories, filters }) {
                 {/* ── Product Grid ── */}
                 {products.data.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
-                        {products.data.map((product) => (
-                            <Link
-                                key={product.id}
-                                href={route('products.show', product.id)}
-                                className="group block"
-                            >
-                                <div className="relative aspect-[3/4] overflow-hidden bg-white mb-4 shadow-sm group-hover:shadow-md transition-all rounded-lg">
-                                    {product.gambar ? (
-                                        <img
-                                            src={`/storage/${product.gambar}`}
-                                            alt={product.nama_produk}
-                                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-                                            Tidak Ada Gambar
-                                        </div>
-                                    )}
-                                    {product.category && (
-                                        <div className="absolute top-3 left-3">
-                                            <span className="bg-white/90 backdrop-blur text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider text-black rounded-sm">
-                                                {product.category.nama_kategori}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <h3 className="text-sm font-bold text-gray-900 mb-1 group-hover:text-amber-600 transition-colors line-clamp-2">
-                                    {product.nama_produk}
-                                </h3>
-                                <p className="text-gray-600 font-semibold text-sm">
-                                    Rp {Number(product.harga).toLocaleString('id-ID')}
-                                </p>
-                            </Link>
-                        ))}
+                        {products.data.map((product) => {
+                            const isOutOfStock = product.stok <= 0;
+                            return (
+                                <Link
+                                    key={product.id}
+                                    href={route('products.show', product.id)}
+                                    className="group block"
+                                >
+                                    <div className={`relative aspect-[3/4] overflow-hidden bg-white mb-4 shadow-sm group-hover:shadow-md transition-all rounded-lg ${isOutOfStock ? 'grayscale opacity-60' : ''}`}>
+                                        {product.gambar ? (
+                                            <img
+                                                src={`/storage/${product.gambar}`}
+                                                alt={product.nama_produk}
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full items-center justify-center text-gray-400 text-sm">
+                                                Tidak Ada Gambar
+                                            </div>
+                                        )}
+                                        {product.category && (
+                                            <div className="absolute top-3 left-3">
+                                                <span className="bg-white/90 backdrop-blur text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider text-black rounded-sm">
+                                                    {product.category.nama_kategori}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {isOutOfStock && (
+                                            <div className="absolute top-3 right-3 z-10">
+                                                <span className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded-md shadow-sm">
+                                                    HABIS
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className={`text-sm font-bold text-gray-900 mb-1 transition-colors line-clamp-2 ${isOutOfStock ? 'opacity-70' : 'group-hover:text-amber-600'}`}>
+                                        {product.nama_produk}
+                                    </h3>
+                                    <p className={`font-semibold text-sm ${isOutOfStock ? 'text-gray-400 line-through' : 'text-gray-600'}`}>
+                                        Rp {Number(product.harga).toLocaleString('id-ID')}
+                                    </p>
+                                </Link>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-24 bg-white rounded-2xl border border-dashed border-gray-200">

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
-import { Check, CreditCard, ChevronDown, MapPin } from 'lucide-react';
+import { Check, CreditCard, ChevronDown, MapPin, Ticket, X, Gift, AlertCircle, Truck, Percent } from 'lucide-react';
 import axios from 'axios';
+import Modal from '@/Components/Modal';
 
-export default function CheckoutIndex({ cartItems, provinces, userAddresses = [] }) {
+export default function CheckoutIndex({ cartItems, provinces, userAddresses = [], userVouchers = [] }) {
     // Calculate totals
     const itemsTotal = cartItems.reduce((sum, item) => {
         const price = item.product.harga + (item.variant ? item.variant.additional_price : 0);
@@ -41,7 +42,22 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
         courier: '',
         shipping_service: '',
         shipping_cost: 0,
+        user_voucher_id: '',
     });
+
+    const [selectedUserVoucher, setSelectedUserVoucher] = useState(null);
+    const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+
+    const handleSelectVoucher = (uv) => {
+        setSelectedUserVoucher(uv);
+        setData('user_voucher_id', uv.pivot.id);
+        setIsVoucherModalOpen(false);
+    };
+
+    const handleRemoveVoucher = () => {
+        setSelectedUserVoucher(null);
+        setData('user_voucher_id', '');
+    };
 
     // Fetch cities when province changes
     useEffect(() => {
@@ -112,7 +128,36 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
         post(route('checkout.store'));
     };
 
-    const grandTotal = itemsTotal + data.shipping_cost;
+    let discountAmount = 0;
+    if (selectedUserVoucher) {
+        const voucher = selectedUserVoucher;
+        if (itemsTotal >= voucher.min_spend) {
+            if (voucher.type === 'shipping') {
+                const shippingCost = data.shipping_cost;
+                if (voucher.discount_type === 'fixed') {
+                    discountAmount = Math.min(shippingCost, voucher.discount_value);
+                } else {
+                    let pctDiscount = shippingCost * (voucher.discount_value / 100);
+                    if (voucher.max_discount) {
+                        pctDiscount = Math.min(pctDiscount, voucher.max_discount);
+                    }
+                    discountAmount = Math.min(shippingCost, pctDiscount);
+                }
+            } else {
+                if (voucher.discount_type === 'fixed') {
+                    discountAmount = Math.min(itemsTotal, voucher.discount_value);
+                } else {
+                    let pctDiscount = itemsTotal * (voucher.discount_value / 100);
+                    if (voucher.max_discount) {
+                        pctDiscount = Math.min(pctDiscount, voucher.max_discount);
+                    }
+                    discountAmount = Math.min(itemsTotal, pctDiscount);
+                }
+            }
+        }
+    }
+
+    const grandTotal = Math.max(0, itemsTotal + data.shipping_cost - discountAmount);
 
     return (
         <div className="bg-gray-50 min-h-screen font-sans text-gray-900">
@@ -254,7 +299,50 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                     </div>
 
                     {/* Right Column: Summary */}
-                    <div className="lg:col-span-4 mt-8 lg:mt-0">
+                    <div className="lg:col-span-4 mt-8 lg:mt-0 space-y-6">
+                        {/* Voucher Selector Panel */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Ticket className="w-5 h-5 text-amber-500" />
+                                Voucher Belanja
+                            </h3>
+
+                            {selectedUserVoucher ? (
+                                <div className="border border-dashed border-amber-300 bg-amber-50/30 rounded-xl p-4 relative group">
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveVoucher}
+                                        className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"
+                                        title="Hapus Voucher"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <span className="font-black text-xs uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                            {selectedUserVoucher.code}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs font-bold text-gray-900 leading-tight">
+                                        {selectedUserVoucher.name}
+                                    </p>
+                                    <p className="text-xs text-green-600 font-bold mt-2">
+                                        Potongan: -Rp {discountAmount.toLocaleString('id-ID')}
+                                    </p>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsVoucherModalOpen(true)}
+                                    className="w-full py-3.5 border-2 border-dashed border-gray-200 hover:border-black rounded-xl text-gray-500 hover:text-black font-extrabold text-sm transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Gift className="w-4 h-4" />
+                                    Pilih Voucher Belanja
+                                </button>
+                            )}
+                            {errors.voucher && <p className="text-red-500 text-xs mt-2 font-bold">{errors.voucher}</p>}
+                        </div>
+
+                        {/* Rincian Pembayaran */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
                             <h2 className="text-lg font-bold mb-4">Rincian Pembayaran</h2>
 
@@ -267,6 +355,12 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                                     <span>Ongkos Kirim ({data.courier?.toUpperCase() || '-'})</span>
                                     <span>Rp {data.shipping_cost.toLocaleString('id-ID')}</span>
                                 </div>
+                                {discountAmount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-bold">
+                                        <span>Potongan Voucher</span>
+                                        <span>-Rp {discountAmount.toLocaleString('id-ID')}</span>
+                                    </div>
+                                )}
                                 <div className="h-px bg-gray-100 my-2"></div>
                                 <div className="flex justify-between font-bold text-xl text-black">
                                     <span>Total Bayar</span>
@@ -289,6 +383,108 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                         </div>
                     </div>
                 </form>
+
+                {/* Voucher Selection Modal */}
+                <Modal show={isVoucherModalOpen} onClose={() => setIsVoucherModalOpen(false)} maxWidth="lg">
+                    <div className="p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <Ticket className="w-5 h-5 text-amber-500" />
+                                    Pilih Voucher Belanja
+                                </h3>
+                                <p className="text-xs text-gray-500 mt-1">Pilih salah satu voucher aktif untuk mendapatkan potongan harga.</p>
+                            </div>
+                            <button 
+                                type="button" 
+                                onClick={() => setIsVoucherModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                            {userVouchers.length > 0 ? (
+                                userVouchers.map((uv) => {
+                                    const isEligible = itemsTotal >= uv.min_spend;
+                                    const isShipping = uv.type === 'shipping';
+                                    const isPercentage = uv.discount_type === 'percentage';
+
+                                    return (
+                                        <div 
+                                            key={uv.pivot.id} 
+                                            onClick={() => isEligible && handleSelectVoucher(uv)}
+                                            className={`border rounded-xl p-4 flex justify-between items-center transition-all ${
+                                                !isEligible 
+                                                    ? 'opacity-50 cursor-not-allowed bg-gray-50 border-gray-200' 
+                                                    : selectedUserVoucher?.pivot?.id === uv.pivot.id
+                                                    ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-500 cursor-pointer'
+                                                    : 'border-gray-200 hover:border-gray-300 cursor-pointer bg-white'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                                                    isShipping ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'
+                                                }`}>
+                                                    {isShipping ? <Truck className="w-5 h-5" /> : <Percent className="w-5 h-5" />}
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-xs uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                                            {uv.code}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">{uv.name}</span>
+                                                    </div>
+                                                    <p className="font-black text-gray-950 mt-1">
+                                                        {isPercentage 
+                                                            ? `Diskon ${uv.discount_value}%` 
+                                                            : `Potongan Rp ${uv.discount_value.toLocaleString('id-ID')}`
+                                                        }
+                                                        {isPercentage && uv.max_discount && (
+                                                            <span className="text-xs font-normal text-gray-500 block">
+                                                                Maks: Rp {uv.max_discount.toLocaleString('id-ID')}
+                                                            </span>
+                                                        )}
+                                                    </p>
+                                                    {!isEligible && (
+                                                        <p className="text-[10px] text-red-500 font-bold mt-1.5 flex items-center gap-1">
+                                                            <AlertCircle className="w-3 h-3" />
+                                                            Belum memenuhi minimum belanja Rp {uv.min_spend.toLocaleString('id-ID')} (Kurang Rp {(uv.min_spend - itemsTotal).toLocaleString('id-ID')})
+                                                        </p>
+                                                    )}
+                                                    {isEligible && uv.min_spend > 0 && (
+                                                        <p className="text-[10px] text-green-600 font-bold mt-1.5 flex items-center gap-1">
+                                                            <Check className="w-3 h-3" />
+                                                            Memenuhi syarat minimal belanja Rp {uv.min_spend.toLocaleString('id-ID')}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="shrink-0">
+                                                {selectedUserVoucher?.pivot?.id === uv.pivot.id ? (
+                                                    <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                                        Terpilih
+                                                    </span>
+                                                ) : isEligible ? (
+                                                    <span className="text-gray-400 hover:text-black text-xs font-bold border border-gray-300 px-3 py-1 rounded-full transition-all">
+                                                        Gunakan
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    <Ticket className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+                                    Anda belum memiliki voucher yang dapat digunakan.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Modal>
             </main>
         </div>
     );

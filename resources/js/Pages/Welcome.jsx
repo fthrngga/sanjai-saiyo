@@ -110,42 +110,52 @@ export default function Welcome({ auth, products, categories }) {
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-8">
                             {/* Tampil 4 produk terlaris di beranda, lengkapnya di /catalog */}
-                            {products.slice(0, 4).map((product) => (
-                                <Link
-                                    key={product.id}
-                                    href={route('products.show', product.id)}
-                                    className="group block"
-                                >
-                                    <div className="relative aspect-[3/4] overflow-hidden bg-white mb-6 shadow-sm group-hover:shadow-md transition-all">
-                                        {/* Image */}
-                                        {product.gambar ? (
-                                            <img
-                                                src={`/storage/${product.gambar}`}
-                                                alt={product.nama_produk}
-                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full items-center justify-center text-gray-400">Tidak Ada Gambar</div>
-                                        )}
-                                        {/* Floating Tag */}
-                                        <div className="absolute top-4 left-4">
-                                            {product.category && (
-                                                <span className="bg-white/90 backdrop-blur text-[10px] font-bold px-3 py-1 uppercase tracking-wider text-black">
-                                                    {product.category.nama_kategori}
-                                                </span>
+                            {products.slice(0, 4).map((product) => {
+                                const isOutOfStock = product.stok <= 0;
+                                return (
+                                    <Link
+                                        key={product.id}
+                                        href={route('products.show', product.id)}
+                                        className="group block"
+                                    >
+                                        <div className={`relative aspect-[3/4] overflow-hidden bg-white mb-6 shadow-sm group-hover:shadow-md transition-all ${isOutOfStock ? 'grayscale opacity-60' : ''}`}>
+                                            {/* Image */}
+                                            {product.gambar ? (
+                                                <img
+                                                    src={`/storage/${product.gambar}`}
+                                                    alt={product.nama_produk}
+                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full items-center justify-center text-gray-400">Tidak Ada Gambar</div>
+                                            )}
+                                            {/* Floating Tag */}
+                                            <div className="absolute top-4 left-4">
+                                                {product.category && (
+                                                    <span className="bg-white/90 backdrop-blur text-[10px] font-bold px-3 py-1 uppercase tracking-wider text-black">
+                                                        {product.category.nama_kategori}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {isOutOfStock && (
+                                                <div className="absolute top-4 right-4 z-10">
+                                                    <span className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded-md shadow-sm">
+                                                        HABIS
+                                                    </span>
+                                                </div>
                                             )}
                                         </div>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:underline decoration-2 underline-offset-4 decoration-yellow-500">
-                                            {product.nama_produk}
-                                        </h3>
-                                        <p className="text-gray-500 font-medium">
-                                            Rp {Number(product.harga).toLocaleString('id-ID')}
-                                        </p>
-                                    </div>
-                                </Link>
-                            ))}
+                                        <div>
+                                            <h3 className={`text-lg font-bold text-gray-900 mb-1 transition-all ${isOutOfStock ? 'opacity-70' : 'group-hover:underline decoration-2 underline-offset-4 decoration-yellow-500'}`}>
+                                                {product.nama_produk}
+                                            </h3>
+                                            <p className={`font-medium ${isOutOfStock ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
+                                                Rp {Number(product.harga).toLocaleString('id-ID')}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
                         </div>
 
                         <div className="mt-12 text-center md:hidden">

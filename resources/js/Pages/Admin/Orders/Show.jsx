@@ -116,6 +116,12 @@ export default function OrderShow({ auth, order }) {
                                 <span>Ongkos Kirim ({order.shipping_courier.toUpperCase()} - {order.shipping_service})</span>
                                 <span>Rp {order.shipping_cost.toLocaleString('id-ID')}</span>
                             </div>
+                            {order.discount_amount > 0 && (
+                                <div className="flex justify-between text-green-600 font-bold">
+                                    <span>Potongan Voucher {order.voucher ? `(${order.voucher.code})` : ''}</span>
+                                    <span>- Rp {Number(order.discount_amount).toLocaleString('id-ID')}</span>
+                                </div>
+                            )}
                             {order.kode_unik && (
                                 <div className="flex justify-between text-blue-600 font-medium">
                                     <span>Kode Unik</span>

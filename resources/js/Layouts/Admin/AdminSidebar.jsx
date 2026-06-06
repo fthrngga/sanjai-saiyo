@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
-import { LayoutDashboard, ShoppingBag, Package, FileText, Star, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Package, FileText, Star, LogOut, Ticket } from 'lucide-react';
 
 export default function AdminSidebar() {
     // usePage().url gives us the current URL path, e.g. "/admin/products"
@@ -18,6 +18,7 @@ export default function AdminSidebar() {
         { name: 'Dashboard',  href: route('dashboard'),             icon: LayoutDashboard },
         { name: 'Penjualan',  href: route('admin.sales.index'),     icon: ShoppingBag },
         { name: 'Produk',     href: route('admin.products.index'),  icon: Package },
+        { name: 'Voucher',    href: route('admin.vouchers.index'),  icon: Ticket },
         { name: 'Pesanan',    href: route('admin.orders.index'),    icon: FileText },
         { name: 'Ulasan',     href: route('admin.reviews.index'),   icon: Star },
     ];

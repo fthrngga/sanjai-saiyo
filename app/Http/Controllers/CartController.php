@@ -25,6 +25,18 @@ class CartController extends Controller
             'product_variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
+        $product = \App\Models\Product::findOrFail($request->product_id);
+        $variant = null;
+        if ($request->product_variant_id) {
+            $variant = \App\Models\ProductVariant::findOrFail($request->product_variant_id);
+        }
+
+        $availableStock = $variant ? $variant->stock : $product->stok;
+
+        if ($availableStock <= 0) {
+            return redirect()->back()->withErrors(['quantity' => 'Stok produk ini sedang habis.']);
+        }
+
         $isBuyNow = $request->boolean('is_buy_now');
 
         // If it's a Buy Now action, deselect all existing cart items first
@@ -37,6 +49,15 @@ class CartController extends Controller
             'product_id' => $request->product_id,
             'product_variant_id' => $request->product_variant_id,
         ]);
+
+        $requestedQty = $request->quantity;
+        if (!$isBuyNow) {
+            $requestedQty += ($cartItem->quantity ?? 0);
+        }
+
+        if ($requestedQty > $availableStock) {
+            return redirect()->back()->withErrors(['quantity' => "Stok tidak mencukupi. Hanya tersedia {$availableStock} unit."]);
+        }
 
         if ($isBuyNow) {
             // For Buy Now, override quantity and forcefully select it
@@ -66,6 +87,13 @@ class CartController extends Controller
             'quantity' => 'nullable|integer|min:1',
             'is_selected' => 'nullable|boolean',
         ]);
+
+        if ($request->has('quantity')) {
+            $availableStock = $cart->variant ? $cart->variant->stock : $cart->product->stok;
+            if ($request->quantity > $availableStock) {
+                return redirect()->back()->withErrors(['quantity' => "Stok tidak mencukupi. Hanya tersedia {$availableStock} unit."]);
+            }
+        }
 
         $cart->update($request->only(['quantity', 'is_selected']));
 

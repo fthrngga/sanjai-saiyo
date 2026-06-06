@@ -5,12 +5,14 @@ import Footer from '@/Components/Landing/Footer';
 import { Minus, Plus, Heart, Share2, ShoppingCart, MessageSquare, Check, Truck } from 'lucide-react';
 
 export default function Detail({ product, related_products }) {
-    const [quantity, setQuantity] = useState(1);
-    const [selectedVariant, setSelectedVariant] = useState(0);
-    const [note, setNote] = useState('');
     const variants = product.variants && product.variants.length > 0
         ? product.variants
         : [{ id: 'default', name: 'Original', additional_price: 0, stock: product.stok }];
+
+    const [selectedVariant, setSelectedVariant] = useState(0);
+    const initialStock = variants[0]?.stock ?? product.stok;
+    const [quantity, setQuantity] = useState(initialStock <= 0 ? 0 : 1);
+    const [note, setNote] = useState('');
 
     const initialImage = variants[0]?.image_path || product.gambar || null;
     const [mainImage, setMainImage] = useState(initialImage);
@@ -45,8 +47,9 @@ export default function Detail({ product, related_products }) {
     }
 
     const handleQuantityChange = (delta) => {
+        const currentStock = variants[selectedVariant]?.stock ?? product.stok;
         const newQty = quantity + delta;
-        if (newQty >= 1 && newQty <= (product.stok || 999)) {
+        if (newQty >= 1 && newQty <= currentStock) {
             setQuantity(newQty);
         }
     };
@@ -183,6 +186,15 @@ export default function Detail({ product, related_products }) {
                                             } else {
                                                 setMainImage(product.gambar);
                                             }
+                                            // Adjust quantity if it exceeds new variant's stock
+                                            const newStock = v.stock ?? product.stok;
+                                            if (newStock <= 0) {
+                                                setQuantity(0);
+                                            } else if (quantity > newStock) {
+                                                setQuantity(newStock);
+                                            } else if (quantity === 0 && newStock > 0) {
+                                                setQuantity(1);
+                                            }
                                         }}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${selectedVariant === idx
                                             ? 'bg-black text-white border-black'
@@ -216,14 +228,14 @@ export default function Detail({ product, related_products }) {
                                 </div>
                                 <div className="text-xs text-gray-500">
                                     <p className="font-medium text-gray-900 truncate max-w-[150px]">{variants[selectedVariant]?.name || 'Original'}</p>
-                                    <p>Stok: {variants[selectedVariant]?.stock || product.stok}</p>
+                                    <p>Stok: {variants[selectedVariant]?.stock ?? product.stok}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center justify-between border border-gray-200 rounded-lg p-1.5 mb-2">
                                 <button
                                     onClick={() => handleQuantityChange(-1)}
-                                    disabled={quantity <= 1}
+                                    disabled={quantity <= 1 || (variants[selectedVariant]?.stock ?? product.stok) <= 0}
                                     className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black disabled:opacity-30"
                                 >
                                     <Minus className="w-4 h-4" />
@@ -231,7 +243,7 @@ export default function Detail({ product, related_products }) {
                                 <span className="font-medium w-12 text-center">{quantity}</span>
                                 <button
                                     onClick={() => handleQuantityChange(1)}
-                                    disabled={quantity >= product.stok}
+                                    disabled={quantity >= (variants[selectedVariant]?.stock ?? product.stok) || (variants[selectedVariant]?.stock ?? product.stok) <= 0}
                                     className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black disabled:opacity-30"
                                 >
                                     <Plus className="w-4 h-4" />
@@ -257,16 +269,18 @@ export default function Detail({ product, related_products }) {
                             <div className="space-y-3">
                                 <button
                                     onClick={handleAddToCart}
-                                    className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
+                                    disabled={(variants[selectedVariant]?.stock ?? product.stok) <= 0}
+                                    className={`w-full py-3 px-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors ${(variants[selectedVariant]?.stock ?? product.stok) <= 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
                                 >
-                                    <Plus className="w-5 h-5" />
-                                    Keranjang
+                                    {((variants[selectedVariant]?.stock ?? product.stok) > 0) && <Plus className="w-5 h-5" />}
+                                    {(variants[selectedVariant]?.stock ?? product.stok) <= 0 ? 'Stok Habis' : 'Keranjang'}
                                 </button>
                                 <button 
                                     onClick={handleBuyNow}
-                                    className="w-full py-3 px-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 flex items-center justify-center gap-2 transition-colors shadow-lg"
+                                    disabled={(variants[selectedVariant]?.stock ?? product.stok) <= 0}
+                                    className={`w-full py-3 px-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg ${(variants[selectedVariant]?.stock ?? product.stok) <= 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'bg-black text-white hover:bg-gray-800'}`}
                                 >
-                                    Beli Langsung
+                                    {(variants[selectedVariant]?.stock ?? product.stok) <= 0 ? 'Stok Habis' : 'Beli Langsung'}
                                 </button>
                             </div>
 
@@ -329,15 +343,30 @@ export default function Detail({ product, related_products }) {
                     <div className="mt-20 border-t border-gray-100 pt-10">
                         <h2 className="text-2xl font-bold mb-6">Mungkin Kamu Suka</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            {related_products.map(p => (
-                                <Link key={p.id} href={route('products.show', p.id)} className="group block">
-                                    <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-3">
-                                        {p.gambar && <img src={`/storage/${p.gambar}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />}
-                                    </div>
-                                    <h3 className="font-semibold text-gray-900 group-hover:text-black">{p.nama_produk}</h3>
-                                    <p className="text-gray-500 text-sm">Rp {p.harga.toLocaleString('id-ID')}</p>
-                                </Link>
-                            ))}
+                            {related_products.map(p => {
+                                const isOutOfStock = p.stok <= 0;
+                                return (
+                                    <Link key={p.id} href={route('products.show', p.id)} className="group block">
+                                        <div className={`relative aspect-square bg-gray-100 rounded-xl overflow-hidden mb-3 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}>
+                                            {p.gambar && (
+                                                <img 
+                                                    src={`/storage/${p.gambar}`} 
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                                                />
+                                            )}
+                                            {isOutOfStock && (
+                                                <div className="absolute top-2.5 right-2.5 z-10">
+                                                    <span className="bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-md shadow-sm">
+                                                        HABIS
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <h3 className={`font-semibold text-gray-900 transition-colors ${isOutOfStock ? 'opacity-70' : 'group-hover:text-black'}`}>{p.nama_produk}</h3>
+                                        <p className={`text-sm ${isOutOfStock ? 'text-gray-400 line-through' : 'text-gray-500'}`}>Rp {p.harga.toLocaleString('id-ID')}</p>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

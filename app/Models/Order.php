@@ -21,7 +21,9 @@ class Order extends Model
         'kode_unik',
         'grand_total',
         'status_pembayaran',
-        'bukti_pembayaran'
+        'bukti_pembayaran',
+        'voucher_id',
+        'discount_amount'
     ];
 
     protected $casts = [
@@ -41,5 +43,10 @@ class Order extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
     }
 }
