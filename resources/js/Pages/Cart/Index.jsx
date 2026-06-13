@@ -90,7 +90,7 @@ export default function CartIndex({ cartItems }) {
                                                 </button>
                                             </div>
 
-                                            <div className="flex items-end justify-between mt-2">
+                                            <div className="flex flex-wrap items-end justify-between gap-2 mt-2">
                                                 <p className="font-bold text-lg">Rp {price.toLocaleString('id-ID')}</p>
 
                                                 <div className="flex items-center bg-gray-50 rounded-lg p-1">

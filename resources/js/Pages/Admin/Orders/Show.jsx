@@ -77,7 +77,7 @@ export default function OrderShow({ auth, order }) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Left Column: Order Details */}
-                <div className="col-span-2 space-y-6">
+                <div className="col-span-1 md:col-span-2 space-y-6">
                     {/* Items */}
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center">

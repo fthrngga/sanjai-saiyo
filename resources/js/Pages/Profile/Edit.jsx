@@ -73,7 +73,7 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses, provinc
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
                                             className={[
-                                                'flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all duration-150 whitespace-nowrap lg:whitespace-normal w-full text-left shrink-0',
+                                                'flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all duration-150 whitespace-nowrap lg:whitespace-normal w-auto lg:w-full text-left shrink-0',
                                                 isActive
                                                     ? 'bg-amber-500 text-white shadow-md shadow-amber-200'
                                                     : 'text-gray-500 hover:bg-amber-50 hover:text-amber-700',

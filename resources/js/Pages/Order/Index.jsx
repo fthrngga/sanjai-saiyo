@@ -57,7 +57,7 @@ export default function OrderIndex({ orders }) {
                         {orderList.map((order) => (
                             <div key={order.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <div className="bg-gray-50 px-6 py-4 flex flex-wrap gap-4 justify-between items-center border-b border-gray-200">
-                                    <div className="flex gap-4 text-sm text-gray-500">
+                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                                         <div>
                                             <span className="block text-xs uppercase font-bold tracking-wider">Order ID</span>
                                             <span className="font-medium text-gray-900">#{order.id}</span>

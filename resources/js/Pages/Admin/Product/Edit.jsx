@@ -106,7 +106,7 @@ export default function Edit({ product, categories }) {
                                 <InputError message={errors.nama_produk} />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="category_id">Kategori</Label>
                                     <select

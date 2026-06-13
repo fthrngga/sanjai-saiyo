@@ -39,7 +39,7 @@ export default function About() {
                             <img
                                 src="/img/foto tentang kami PA.jpg"
                                 alt="Dapur Tradisional"
-                                className="relative z-10 w-full h-[500px] object-cover rounded-[2rem] shadow-2xl contrast-110 saturate-110 brightness-105 hover:saturate-125 transition-all duration-700"
+                                className="relative z-10 w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover rounded-[2rem] shadow-2xl contrast-110 saturate-110 brightness-105 hover:saturate-125 transition-all duration-700"
                             />
                         </div>
                         <div className="space-y-8">

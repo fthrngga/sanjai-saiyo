@@ -1,6 +1,6 @@
 import AdminSidebar from './AdminSidebar';
 import { Head, usePage, router } from '@inertiajs/react';
-import { User, CheckCircle, X, Bell } from 'lucide-react';
+import { User, CheckCircle, X, Bell, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Modal from '@/Components/Modal';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm';
@@ -10,6 +10,7 @@ export default function AdminLayout({ children, title }) {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showNotif, setShowNotif] = useState(false);
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const markAsRead = () => {
         router.post(route('notifications.markRead'), {}, { preserveScroll: true });
@@ -27,12 +28,51 @@ export default function AdminLayout({ children, title }) {
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <Head title={title} />
 
-            <AdminSidebar />
+            {/* Sidebar Desktop */}
+            <div className="hidden md:flex md:flex-none">
+                <AdminSidebar />
+            </div>
+
+            {/* Sidebar Mobile (Overlay/Drawer) */}
+            {sidebarOpen && (
+                <div className="fixed inset-0 z-40 flex md:hidden">
+                    {/* Backdrop */}
+                    <div 
+                        className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity duration-300"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                    
+                    {/* Drawer Content */}
+                    <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl transition-all duration-300">
+                        {/* Close Button Inside Drawer */}
+                        <div className="absolute top-0 right-0 -mr-12 pt-2">
+                            <button
+                                type="button"
+                                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                                onClick={() => setSidebarOpen(false)}
+                            >
+                                <span className="sr-only">Close sidebar</span>
+                                <X className="h-6 w-6 text-white" />
+                            </button>
+                        </div>
+                        <AdminSidebar onLinkClick={() => setSidebarOpen(false)} />
+                    </div>
+                </div>
+            )}
 
             <main className="flex-1 flex flex-col h-full overflow-hidden">
                 {/* Header */}
-                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-none">
-                    <h1 className="text-xl font-bold text-gray-800">{title}</h1>
+                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 flex-none">
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(true)}
+                            className="p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 md:hidden"
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <h1 className="text-lg md:text-xl font-bold text-gray-800">{title}</h1>
+                    </div>
 
                     <div className="flex items-center gap-4">
                         <button 
@@ -50,7 +90,7 @@ export default function AdminLayout({ children, title }) {
                             >
                                 <Bell size={20} />
                                 {unread_notifications_count > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white">
+                                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold text-white bg-red-50 rounded-full border-2 border-white">
                                         {unread_notifications_count}
                                     </span>
                                 )}
@@ -101,7 +141,7 @@ export default function AdminLayout({ children, title }) {
                 </header>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8">
                     {children}
                 </div>
             </main>

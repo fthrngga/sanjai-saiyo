@@ -13,9 +13,9 @@ export default function Welcome({ auth, products, categories }) {
 
             <main>
                 {/* HERO SECTION */}
-                <section className="relative w-full h-screen min-h-[700px] flex flex-col md:flex-row overflow-hidden">
+                <section className="relative w-full h-auto md:h-screen md:min-h-[700px] flex flex-col md:flex-row overflow-hidden">
                     {/* Left Column - Text & Brand */}
-                    <div className="w-full md:w-1/2 h-full bg-white flex flex-col justify-center px-8 md:px-24 xl:px-32 relative z-10 order-2 md:order-1 pt-24 md:pt-0">
+                    <div className="w-full md:w-1/2 py-12 md:py-0 bg-white flex flex-col justify-center px-6 md:px-24 xl:px-32 relative z-10 order-2 md:order-1 pt-8 md:pt-0">
                         {/* Background typography decoration */}
                         <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/4 opacity-[0.03] select-none pointer-events-none">
                             <span className="text-[400px] font-black leading-none">SS</span>
@@ -51,7 +51,7 @@ export default function Welcome({ auth, products, categories }) {
                     </div>
 
                     {/* Right Column - Visual */}
-                    <div className="w-full md:w-1/2 h-[50vh] md:h-full bg-gray-100 relative order-1 md:order-2 group overflow-hidden">
+                    <div className="w-full md:w-1/2 h-[35vh] sm:h-[45vh] md:h-full bg-gray-100 relative order-1 md:order-2 group overflow-hidden">
                         <img
                             src="/img/hero_sanjai_hd.png"
                             alt="Lifestyle"

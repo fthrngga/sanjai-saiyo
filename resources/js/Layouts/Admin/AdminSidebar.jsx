@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { LayoutDashboard, ShoppingBag, Package, FileText, Star, LogOut, Ticket } from 'lucide-react';
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onLinkClick }) {
     // usePage().url gives us the current URL path, e.g. "/admin/products"
     const { url: currentUrl, unread_orders_count } = usePage().props;
     const pageUrl = usePage().url; // This is the reliable source
@@ -58,6 +58,7 @@ export default function AdminSidebar() {
                         <Link
                             key={link.name}
                             href={link.href}
+                            onClick={onLinkClick}
                             className={[
                                 'flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 relative overflow-hidden',
                                 active
@@ -76,7 +77,7 @@ export default function AdminSidebar() {
                             {link.name === 'Pesanan' && unread_orders_count > 0 && (
                                 <span className={[
                                     'min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full text-xs font-bold animate-pulse',
-                                    active ? 'bg-white text-amber-600' : 'bg-red-500 text-white',
+                                    active ? 'bg-white text-amber-600' : 'bg-red-50 text-white',
                                 ].join(' ')}>
                                     {unread_orders_count}
                                 </span>
@@ -92,6 +93,7 @@ export default function AdminSidebar() {
                     href={route('logout')}
                     method="post"
                     as="button"
+                    onClick={onLinkClick}
                     className="flex w-full items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-xl text-sm font-semibold transition-all duration-150"
                 >
                     <LogOut size={20} />
