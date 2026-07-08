@@ -185,7 +185,7 @@ export default function PosIndex({ auth, products }) {
                                 >
                                     <div className="aspect-square bg-gray-100 relative overflow-hidden">
                                         <img 
-                                            src={product.gambar ? `/${product.gambar}` : '/placeholder.png'} 
+                                            src={product.gambar ? `/storage/${product.gambar}` : '/placeholder.png'} 
                                             alt={product.nama_produk} 
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
@@ -231,7 +231,7 @@ export default function PosIndex({ auth, products }) {
                             cart.map((item, index) => (
                                 <div key={index} className="flex gap-3 items-center group bg-gray-50 p-2 rounded-xl border border-gray-100">
                                     <div className="w-14 h-14 bg-white rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-                                        <img src={item.image ? `/${item.image}` : '/placeholder.png'} className="w-full h-full object-cover" alt="" />
+                                        <img src={item.image ? `/storage/${item.image}` : '/placeholder.png'} className="w-full h-full object-cover" alt="" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h4 className="font-bold text-sm text-gray-900 truncate">{item.name}</h4>
@@ -299,7 +299,7 @@ export default function PosIndex({ auth, products }) {
                         </div>
                         <div className="p-4 flex gap-4">
                             <div className="w-24 h-24 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0">
-                                <img src={`/${selectedProductForVariant.gambar}`} alt="" className="w-full h-full object-cover" />
+                                <img src={`/storage/${selectedProductForVariant.gambar}`} alt="" className="w-full h-full object-cover" />
                             </div>
                             <div>
                                 <h4 className="font-bold text-gray-900 mb-1">{selectedProductForVariant.nama_produk}</h4>
@@ -316,7 +316,7 @@ export default function PosIndex({ auth, products }) {
                                     <div className="flex items-center gap-3">
                                         {variant.image_path && (
                                             <div className="w-10 h-10 rounded-lg overflow-hidden bg-white">
-                                                <img src={`/${variant.image_path}`} className="w-full h-full object-cover" alt="" />
+                                                <img src={`/storage/${variant.image_path}`} className="w-full h-full object-cover" alt="" />
                                             </div>
                                         )}
                                         <div>
