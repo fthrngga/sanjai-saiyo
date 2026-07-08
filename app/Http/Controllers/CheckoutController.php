@@ -28,14 +28,15 @@ class CheckoutController extends Controller
         $userAddresses = auth()->user()->addresses;
 
         $now = now();
-        $userVouchers = auth()->user()->claimedVouchers()
-            ->whereNull('user_vouchers.used_at')
-            ->where('vouchers.is_active', true)
-            ->where(function($q) use ($now) {
-                $q->whereNull('vouchers.start_date')->orWhere('vouchers.start_date', '<=', $now);
+        $availableVouchers = \App\Models\Voucher::where('is_active', true)
+            ->where(function($q) {
+                $q->where('quota', '>', 0)->orWhere('quota', -1);
             })
             ->where(function($q) use ($now) {
-                $q->whereNull('vouchers.end_date')->orWhere('vouchers.end_date', '>=', $now);
+                $q->whereNull('start_date')->orWhere('start_date', '<=', $now);
+            })
+            ->where(function($q) use ($now) {
+                $q->whereNull('end_date')->orWhere('end_date', '>=', $now);
             })
             ->get();
 
@@ -43,7 +44,7 @@ class CheckoutController extends Controller
             'cartItems' => $cartItems,
             'provinces' => $provinces,
             'userAddresses' => $userAddresses,
-            'userVouchers' => $userVouchers
+            'availableVouchers' => $availableVouchers
         ]);
     }
 
@@ -100,7 +101,7 @@ class CheckoutController extends Controller
             'courier' => 'required|string',
             'shipping_service' => 'required|string',
             'shipping_cost' => 'required|integer',
-            'user_voucher_id' => 'nullable|integer',
+            'voucher_id' => 'nullable|integer',
         ]);
 
         $cartItems = \App\Models\Cart::with(['product', 'variant'])
@@ -130,25 +131,18 @@ class CheckoutController extends Controller
         $shippingCost = $request->shipping_cost;
         $discountAmount = 0;
         $voucherId = null;
-        $userVoucher = null;
 
-        if ($request->user_voucher_id) {
-            $userVoucher = auth()->user()->userVouchers()
-                ->where('id', $request->user_voucher_id)
-                ->whereNull('used_at')
-                ->first();
+        if ($request->voucher_id) {
+            $voucher = \App\Models\Voucher::find($request->voucher_id);
+            if ($voucher && $voucher->is_active && ($voucher->quota > 0 || $voucher->quota == -1)) {
+                $now = now();
+                $isValidDate = (!$voucher->start_date || $voucher->start_date <= $now) && 
+                               (!$voucher->end_date || $voucher->end_date >= $now);
 
-            if ($userVoucher) {
-                $voucher = \App\Models\Voucher::find($userVoucher->voucher_id);
-                if ($voucher && $voucher->is_active) {
-                    $now = now();
-                    $isValidDate = (!$voucher->start_date || $voucher->start_date <= $now) && 
-                                   (!$voucher->end_date || $voucher->end_date >= $now);
+                if ($isValidDate && $itemsTotal >= $voucher->min_spend) {
+                    $voucherId = $voucher->id;
 
-                    if ($isValidDate && $itemsTotal >= $voucher->min_spend) {
-                        $voucherId = $voucher->id;
-
-                        if ($voucher->type === 'shipping') {
+                    if ($voucher->type === 'shipping') {
                             if ($voucher->discount_type === 'fixed') {
                                 $discountAmount = min($shippingCost, $voucher->discount_value);
                             } else {
@@ -171,10 +165,9 @@ class CheckoutController extends Controller
                         }
                     }
                 }
-            }
 
             if (!$voucherId) {
-                return back()->withErrors(['voucher' => 'Voucher tidak valid atau tidak memenuhi syarat minimum belanja.']);
+                return back()->withErrors(['voucher' => 'Voucher tidak valid, kuota habis, atau tidak memenuhi syarat minimum belanja.']);
             }
         }
 
@@ -183,7 +176,7 @@ class CheckoutController extends Controller
         $grandTotal = max(0, $itemsTotal + $shippingCost - $discountAmount) + $kodeUnik;
 
         // Create Order and items inside transaction
-        $order = \DB::transaction(function () use ($request, $cartItems, $totalPrice, $shippingCost, $kodeUnik, $grandTotal, $voucherId, $discountAmount, $userVoucher) {
+        $order = \DB::transaction(function () use ($request, $cartItems, $totalPrice, $shippingCost, $kodeUnik, $grandTotal, $voucherId, $discountAmount) {
             $order = \App\Models\Order::create([
                 'user_id' => auth()->id(),
                 'address_snapshot' => $request->only(['recipient_name', 'phone_number', 'full_address', 'province_name', 'city_name', 'province_id', 'city_id']),
@@ -215,10 +208,18 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            if ($userVoucher) {
-                $userVoucher->update([
+            if ($voucherId) {
+                $voucherToUpdate = \App\Models\Voucher::find($voucherId);
+                if ($voucherToUpdate && $voucherToUpdate->quota > 0) {
+                    $voucherToUpdate->decrement('quota');
+                }
+
+                \App\Models\UserVoucher::create([
+                    'user_id' => auth()->id(),
+                    'voucher_id' => $voucherId,
+                    'order_id' => $order->id,
+                    'claimed_at' => now(),
                     'used_at' => now(),
-                    'order_id' => $order->id
                 ]);
             }
 

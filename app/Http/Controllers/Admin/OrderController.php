@@ -191,7 +191,6 @@ class OrderController extends Controller
         } else {
             $order->update([
                 'status_pembayaran' => 'failed', // Ubah ke failed agar user tahu
-                'bukti_pembayaran' => null, // Hapus bukti yang lama
                 'cancel_reason' => $request->payment_reject_reason ?? 'Bukti pembayaran tidak valid atau nominal tidak sesuai.',
             ]);
             return redirect()->back()->with('success', 'Pembayaran ditolak. Pelanggan dapat mengunggah ulang bukti pembayaran.');

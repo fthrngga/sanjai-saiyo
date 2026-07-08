@@ -242,13 +242,20 @@ export default function OrderShow({ auth, order }) {
                             )}
                         </div>
                         <div className="p-6">
-                            {order.bukti_pembayaran ? (
+                            {Array.isArray(order.bukti_pembayaran) && order.bukti_pembayaran.length > 0 ? (
                                 <div className="space-y-4">
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran dari Pelanggan:</p>
-                                        <a href={`/${order.bukti_pembayaran}`} target="_blank" rel="noreferrer" className="block w-full rounded-xl overflow-hidden border border-gray-200 hover:opacity-90 transition-opacity">
-                                            <img src={`/${order.bukti_pembayaran}`} alt="Bukti Transfer" className="w-full object-cover max-h-64" />
-                                        </a>
+                                        <p className="text-sm font-medium text-gray-700 mb-3">Bukti Pembayaran dari Pelanggan:</p>
+                                        <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
+                                            {order.bukti_pembayaran.map((bukti, index) => (
+                                                <a key={index} href={`/${bukti}`} target="_blank" rel="noreferrer" className="block w-48 shrink-0 snap-start rounded-xl overflow-hidden border border-gray-200 hover:opacity-90 transition-opacity relative group shadow-sm">
+                                                    <span className="absolute top-2 left-2 bg-black/60 text-white text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded backdrop-blur-sm z-10">
+                                                        {index === order.bukti_pembayaran.length - 1 ? 'Terbaru' : `Ke-${index + 1}`}
+                                                    </span>
+                                                    <img src={`/${bukti}`} alt={`Bukti Transfer ${index + 1}`} className="w-full h-48 object-cover" />
+                                                </a>
+                                            ))}
+                                        </div>
                                         <p className="text-xs text-gray-500 mt-2 italic text-center">Klik gambar untuk memperbesar</p>
                                     </div>
                                     

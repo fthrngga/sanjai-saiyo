@@ -5,7 +5,7 @@ import { Check, CreditCard, ChevronDown, MapPin, Ticket, X, Gift, AlertCircle, T
 import axios from 'axios';
 import Modal from '@/Components/Modal';
 
-export default function CheckoutIndex({ cartItems, provinces, userAddresses = [], userVouchers = [] }) {
+export default function CheckoutIndex({ cartItems, provinces, userAddresses = [], availableVouchers = [] }) {
     // Calculate totals
     const itemsTotal = cartItems.reduce((sum, item) => {
         const price = item.product.harga + (item.variant ? item.variant.additional_price : 0);
@@ -42,7 +42,7 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
         courier: '',
         shipping_service: '',
         shipping_cost: 0,
-        user_voucher_id: '',
+        voucher_id: '',
     });
 
     const [selectedUserVoucher, setSelectedUserVoucher] = useState(null);
@@ -50,13 +50,13 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
 
     const handleSelectVoucher = (uv) => {
         setSelectedUserVoucher(uv);
-        setData('user_voucher_id', uv.pivot.id);
+        setData('voucher_id', uv.id);
         setIsVoucherModalOpen(false);
     };
 
     const handleRemoveVoucher = () => {
         setSelectedUserVoucher(null);
-        setData('user_voucher_id', '');
+        setData('voucher_id', '');
     };
 
     // Fetch cities when province changes
@@ -405,20 +405,20 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                         </div>
 
                         <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                            {userVouchers.length > 0 ? (
-                                userVouchers.map((uv) => {
+                            {availableVouchers.length > 0 ? (
+                                availableVouchers.map((uv) => {
                                     const isEligible = itemsTotal >= uv.min_spend;
                                     const isShipping = uv.type === 'shipping';
                                     const isPercentage = uv.discount_type === 'percentage';
 
                                     return (
                                         <div 
-                                            key={uv.pivot.id} 
+                                            key={uv.id} 
                                             onClick={() => isEligible && handleSelectVoucher(uv)}
                                             className={`border rounded-xl p-4 flex justify-between items-center transition-all ${
                                                 !isEligible 
                                                     ? 'opacity-50 cursor-not-allowed bg-gray-50 border-gray-200' 
-                                                    : selectedUserVoucher?.pivot?.id === uv.pivot.id
+                                                    : selectedUserVoucher?.id === uv.id
                                                     ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-500 cursor-pointer'
                                                     : 'border-gray-200 hover:border-gray-300 cursor-pointer bg-white'
                                             }`}
@@ -463,7 +463,7 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                                             </div>
 
                                             <div className="shrink-0">
-                                                {selectedUserVoucher?.pivot?.id === uv.pivot.id ? (
+                                                {selectedUserVoucher?.id === uv.id ? (
                                                     <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                                                         Terpilih
                                                     </span>
@@ -479,7 +479,7 @@ export default function CheckoutIndex({ cartItems, provinces, userAddresses = []
                             ) : (
                                 <div className="text-center py-8 text-gray-500">
                                     <Ticket className="w-10 h-10 mx-auto text-gray-300 mb-2" />
-                                    Anda belum memiliki voucher yang dapat digunakan.
+                                    Tidak ada voucher yang tersedia saat ini.
                                 </div>
                             )}
                         </div>

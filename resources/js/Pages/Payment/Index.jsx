@@ -138,10 +138,19 @@ export default function PaymentIndex({ order, dynamic_qris }) {
                                     <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                                     <h3 className="text-xl font-bold text-blue-800 mb-2">Verifikasi Sedang Berlangsung</h3>
                                     <p className="text-blue-700">Admin kami sedang mengecek mutasi pembayaran Anda. Mohon tunggu sebentar.</p>
-                                    {order.bukti_pembayaran && (
-                                        <div className="mt-6 mt-4 inline-block">
-                                            <p className="text-sm text-blue-600 mb-2 font-medium">Bukti yang diunggah:</p>
-                                            <img src={`/${order.bukti_pembayaran}`} alt="Bukti Pembayaran" className="h-40 rounded-lg border border-blue-200 object-cover" />
+                                    {Array.isArray(order.bukti_pembayaran) && order.bukti_pembayaran.length > 0 && (
+                                        <div className="mt-6">
+                                            <p className="text-sm text-blue-600 mb-3 font-medium">Riwayat Bukti yang Diunggah:</p>
+                                            <div className="flex gap-3 justify-center flex-wrap">
+                                                {order.bukti_pembayaran.map((bukti, index) => (
+                                                    <a key={index} href={`/${bukti}`} target="_blank" rel="noreferrer" className="relative group block hover:opacity-80 transition-opacity">
+                                                        <span className="absolute -top-2 -left-2 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                                                            {index + 1}
+                                                        </span>
+                                                        <img src={`/${bukti}`} alt={`Bukti ${index + 1}`} className="h-28 w-24 object-cover rounded-lg border border-blue-200 shadow-sm" />
+                                                    </a>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -150,7 +159,20 @@ export default function PaymentIndex({ order, dynamic_qris }) {
                                     {isFailed && (
                                         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 text-sm">
                                             <p className="font-bold mb-1">Verifikasi Ditolak</p>
-                                            <p>{order.cancel_reason || 'Bukti pembayaran sebelumnya tidak valid. Silakan unggah ulang bukti yang benar.'}</p>
+                                            <p className="mb-3">{order.cancel_reason || 'Bukti pembayaran sebelumnya tidak valid. Silakan unggah ulang bukti yang benar.'}</p>
+                                            
+                                            {Array.isArray(order.bukti_pembayaran) && order.bukti_pembayaran.length > 0 && (
+                                                <div className="mt-3 pt-3 border-t border-red-200/50">
+                                                    <p className="text-xs font-semibold mb-2">Riwayat Ditolak ({order.bukti_pembayaran.length}/3):</p>
+                                                    <div className="flex gap-2">
+                                                        {order.bukti_pembayaran.map((bukti, index) => (
+                                                            <a key={index} href={`/${bukti}`} target="_blank" rel="noreferrer" className="relative block hover:opacity-100 transition-opacity">
+                                                                <img src={`/${bukti}`} className="h-16 w-12 object-cover rounded border border-red-200 opacity-80 hover:opacity-100" alt={`Riwayat ${index + 1}`} />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     <h3 className="font-bold text-lg mb-4">Upload Bukti Transfer</h3>

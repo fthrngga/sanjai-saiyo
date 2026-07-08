@@ -93,6 +93,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('admin/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('admin.reviews.index');
     Route::post('admin/reviews/bulk-destroy', [\App\Http\Controllers\Admin\ReviewController::class, 'bulkDestroy'])->name('admin.reviews.bulkDestroy');
     Route::delete('admin/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+    
+    Route::get('admin/pos', [\App\Http\Controllers\Admin\PosController::class, 'index'])->name('admin.pos.index');
+    Route::post('admin/pos/checkout', [\App\Http\Controllers\Admin\PosController::class, 'store'])->name('admin.pos.store');
 });
 
 Route::middleware('auth')->group(function () {

@@ -28,6 +28,7 @@ class Order extends Model
 
     protected $casts = [
         'address_snapshot' => 'array',
+        'bukti_pembayaran' => 'array',
     ];
 
     public function user()

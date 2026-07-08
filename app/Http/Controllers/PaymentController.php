@@ -41,8 +41,18 @@ class PaymentController extends Controller
         if ($request->hasFile('bukti_pembayaran')) {
             $path = $request->file('bukti_pembayaran')->store('receipts', 'public');
             
+            $proofs = $order->bukti_pembayaran ?? [];
+            if (!is_array($proofs)) {
+                $proofs = [];
+            }
+            $proofs[] = 'storage/' . $path;
+
+            if (count($proofs) > 3) {
+                $proofs = array_slice($proofs, -3, 3);
+            }
+
             $order->update([
-                'bukti_pembayaran' => 'storage/' . $path,
+                'bukti_pembayaran' => $proofs,
                 'status_pembayaran' => 'pending_verification'
             ]);
         }
