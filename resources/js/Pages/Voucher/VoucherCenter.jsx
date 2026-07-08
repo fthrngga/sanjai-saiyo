@@ -4,17 +4,7 @@ import { Head, router } from '@inertiajs/react';
 import { Ticket, Truck, Percent, Calendar, Check, AlertCircle, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 
-export default function VoucherCenter({ vouchers, claimedVoucherIds }) {
-    const [claimingId, setClaimingId] = useState(null);
-
-    const handleClaim = (voucherId) => {
-        setClaimingId(voucherId);
-        router.post(route('vouchers.claim', voucherId), {}, {
-            preserveScroll: true,
-            onFinish: () => setClaimingId(null)
-        });
-    };
-
+export default function VoucherCenter({ vouchers }) {
     const formatDate = (dateString) => {
         if (!dateString) return 'Selamanya';
         return new Date(dateString).toLocaleDateString('id-ID', {
@@ -40,7 +30,7 @@ export default function VoucherCenter({ vouchers, claimedVoucherIds }) {
                             Pusat Voucher Belanja
                         </h1>
                         <p className="text-gray-500 font-medium text-lg leading-relaxed">
-                            Klaim berbagai diskon menarik untuk menghemat ongkos kirim atau dapatkan potongan harga langsung dari produk pilihan terbaik kami.
+                            Cek berbagai diskon menarik untuk menghemat ongkos kirim atau dapatkan potongan harga langsung dari produk pilihan terbaik kami. Promo akan langsung aktif di halaman Checkout!
                         </p>
                     </div>
 
@@ -48,7 +38,6 @@ export default function VoucherCenter({ vouchers, claimedVoucherIds }) {
                     {vouchers.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {vouchers.map((voucher) => {
-                                const isClaimed = claimedVoucherIds.includes(voucher.id);
                                 const isShipping = voucher.type === 'shipping';
                                 const isPercentage = voucher.discount_type === 'percentage';
 
@@ -117,34 +106,12 @@ export default function VoucherCenter({ vouchers, claimedVoucherIds }) {
                                             </div>
 
                                             {/* Action Button */}
-                                            <button
-                                                onClick={() => !isClaimed && handleClaim(voucher.id)}
-                                                disabled={isClaimed || claimingId === voucher.id}
-                                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-                                                    isClaimed
-                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                        : claimingId === voucher.id
-                                                        ? 'bg-amber-400 text-white cursor-wait'
-                                                        : 'bg-black text-white hover:bg-gray-800 shadow hover:shadow-md'
-                                                }`}
+                                            <div
+                                                className="w-full py-3 rounded-xl font-extrabold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-amber-50 text-amber-700 border border-amber-200"
                                             >
-                                                {isClaimed ? (
-                                                    <>
-                                                        <Check className="w-4 h-4 text-green-500" />
-                                                        Sudah Diklaim
-                                                    </>
-                                                ) : claimingId === voucher.id ? (
-                                                    <>
-                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                        Mengeklaim...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Ticket className="w-4 h-4" />
-                                                        Klaim Voucher
-                                                    </>
-                                                )}
-                                            </button>
+                                                <Check className="w-4 h-4" />
+                                                Otomatis Tersedia di Checkout
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -156,7 +123,7 @@ export default function VoucherCenter({ vouchers, claimedVoucherIds }) {
                                 <Ticket className="w-8 h-8 text-gray-300" />
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 mb-2">Belum Ada Voucher</h3>
-                            <p className="text-gray-500 mb-4 px-6">Saat ini tidak ada voucher publik yang tersedia untuk diklaim. Kembali lagi nanti untuk promo terbaru!</p>
+                            <p className="text-gray-500 mb-4 px-6">Saat ini tidak ada voucher publik yang tersedia. Kembali lagi nanti untuk promo terbaru!</p>
                         </div>
                     )}
                 </main>
